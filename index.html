@@ -227,11 +227,16 @@
   .export-menu button:hover{background:var(--line-2)}
   .export-menu .ext{font-family:'Geist Mono',monospace;font-size:11px;color:var(--muted)}
   @media(max-width:768px){
-    html,body{overflow-x:hidden}
-    .app{padding:12px 12px 48px;max-width:100vw}
-    .topbar{flex-wrap:wrap;gap:8px;padding:4px 0 14px}
-    .topright{gap:8px;flex-wrap:wrap;font-size:12px}
-    .nowclock{font-size:12px}
+    html,body{overflow-x:hidden;width:100%;max-width:100vw}
+    *{max-width:100%;box-sizing:border-box}
+    table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .app{padding:12px 12px 48px;max-width:100vw;overflow-x:hidden}
+    .topbar{flex-wrap:wrap;gap:6px;padding:4px 0 14px}
+    .topright{gap:6px;flex-wrap:wrap;font-size:11px;width:100%}
+    .nowclock{font-size:11px}
+    .export-wrap button{padding:6px 10px!important;font-size:11px!important}
+    .user-badge{padding:4px 8px;font-size:11px;gap:6px}
+    .brand{font-size:12px}
     .grid{grid-template-columns:1fr!important;gap:12px}
     .today{grid-template-columns:1fr!important;gap:12px}
     .today-time{font-size:52px!important;line-height:1}
@@ -249,7 +254,7 @@
     .cal-day{font-size:10px}
     .cal-hours{font-size:7.5px}
     .cal-h{font-size:9px;padding:4px 0}
-    .hist-table{font-size:11px}
+    .hist-table{font-size:11px;min-width:500px}
     .hist-table th,.hist-table td{padding:8px 6px}
     .hist-table .right{text-align:right}
     .modal{padding:16px;border-radius:14px;width:calc(100vw - 24px)}
@@ -260,7 +265,7 @@
     .week-total .small{font-size:14px}
     .week-prog{min-width:80px}
     .btn{padding:12px 16px;font-size:13px}
-    .export-menu{right:-10px;min-width:200px}
+    .export-menu{right:0;min-width:180px;font-size:12px}
     .modal-stats{grid-template-columns:1fr 1fr}
     .status-block{flex-wrap:wrap;gap:6px}
     .brand{font-size:13px}

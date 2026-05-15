@@ -229,9 +229,12 @@
   .export-menu button:hover{background:var(--line-2)}
   .export-menu .ext{font-family:'Geist Mono',monospace;font-size:11px;color:var(--muted)}
   @media(max-width:768px){
-    html,body{overflow-x:hidden;width:100%;max-width:100vw}
-    *{max-width:100%;box-sizing:border-box}
-    table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    html,body,#root{overflow-x:hidden!important;width:100%!important;max-width:100vw!important}
+    *{box-sizing:border-box!important}
+    .app{padding:12px!important;max-width:100vw!important;overflow-x:hidden!important;width:100%!important}
+    .modal{width:calc(100vw - 32px)!important;max-width:calc(100vw - 32px)!important}
+    .config-box{width:calc(100vw - 32px)!important;max-width:calc(100vw - 32px)!important}
+    table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%}
     .app{padding:12px 12px 48px;max-width:100vw;overflow-x:hidden}
     .topbar{flex-wrap:wrap;gap:6px;padding:4px 0 14px}
     .topright{gap:6px;flex-wrap:wrap;font-size:11px;width:100%}
@@ -245,7 +248,7 @@
     .today-right{flex-direction:row;align-items:center;gap:14px}
     .ring-wrap{max-width:140px!important;min-width:140px}
     .ring-val{font-size:22px}
-    .week-meter{height:90px;gap:4px}
+    .week-meter{height:90px;gap:4px;overflow:hidden;width:100%}
     .day-bar-wrap{max-width:28px}
     .kvs{grid-template-columns:1fr 1fr;gap:8px 14px}
     .kv-v{font-size:16px}

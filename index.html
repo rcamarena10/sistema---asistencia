@@ -646,6 +646,20 @@ function WeekCard({week,cfg}){
           ?<span className="pill pill-ok"><span className="dot"/>✓ Meta</span>
           :<span style={{fontSize:11,color:'var(--muted)',fontFamily:'Geist Mono,monospace',whiteSpace:'nowrap'}}>{Math.round(pctReal)}%</span>}
       </div>
+      <div style={{display:'flex',gap:16,marginTop:12,paddingTop:12,borderTop:'1px solid var(--line-2)',flexWrap:'wrap'}}>
+        <div style={{display:'flex',alignItems:'center',gap:6,fontSize:11,color:'var(--muted)'}}>
+          <div style={{width:10,height:10,borderRadius:3,background:'var(--accent)'}}/>A tiempo
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:6,fontSize:11,color:'var(--muted)'}}>
+          <div style={{width:10,height:10,borderRadius:3,background:'var(--late)'}}/>Tardanza
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:6,fontSize:11,color:'var(--muted)'}}>
+          <div style={{width:10,height:10,borderRadius:3,background:'var(--over)'}}/>Horas extras
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:6,fontSize:11,color:'var(--muted)'}}>
+          <div style={{width:10,height:10,borderRadius:3,background:'var(--line)',border:'1px dashed var(--muted)'}}/>Sin registrar
+        </div>
+      </div>
     </div>
   );
 }

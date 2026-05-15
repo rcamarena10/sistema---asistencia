@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Sistema de Asistencia</title>
+<meta name="viewport" content="width=1280">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+
+<style>
+  /* ── CONFIG NOTICE ── */
+  .config-notice{position:fixed;inset:0;background:#0F0F0E;display:flex;align-items:center;justify-content:center;z-index:9999;font-family:'Geist',sans-serif}
+  .config-box{background:#1D1D1B;border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:40px;max-width:540px;width:90%}
+  .config-box h1{margin:0 0 8px;font-size:22px;color:#F2F1ED;font-weight:600}
+  .config-box p{margin:0 0 20px;font-size:14px;color:#7E7C77;line-height:1.6}
+  .config-box input{width:100%;background:#0F0F0E;border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:12px 14px;font-family:'Geist Mono',monospace;font-size:13px;color:#F2F1ED;margin-bottom:10px}
+  .config-box input:focus{outline:none;border-color:oklch(72% 0.13 152)}
+  .config-box button{background:#F2F1ED;color:#0F0F0E;border:0;border-radius:10px;padding:12px 24px;font-family:'Geist',sans-serif;font-size:14px;font-weight:600;cursor:pointer;width:100%}
+  .config-box button:hover{background:#fff}
+  .config-box .hint{font-size:11px;color:#7E7C77;margin-top:8px;line-height:1.5}
+
+  /* ── LOGIN SCREEN ── */
+  .login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:500}
+  .login-box{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:40px;max-width:400px;width:90%;box-shadow:0 30px 80px rgba(0,0,0,.15)}
+  .login-box h2{margin:0 0 6px;font-size:22px;font-weight:600;letter-spacing:-0.02em;color:var(--ink)}
+  .login-box p{margin:0 0 24px;font-size:13px;color:var(--muted)}
+  .login-box label{display:block;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+  .login-box input{width:100%;background:var(--canvas);border:1px solid var(--line-2);border-radius:10px;padding:12px 14px;font-family:inherit;font-size:14px;color:var(--ink);margin-bottom:14px}
+  .login-box input:focus{outline:none;border-color:var(--accent)}
+  .login-box .login-btn{appearance:none;border:0;background:var(--ink);color:var(--card);border-radius:12px;padding:14px;font-family:inherit;font-size:14px;font-weight:500;cursor:pointer;width:100%;margin-top:4px}
+  .login-box .login-btn:hover{background:color-mix(in oklch, var(--ink), var(--accent) 30%)}
+  .login-box .login-err{font-size:12px;color:var(--late);margin-top:-8px;margin-bottom:10px}
+  .login-box .login-sep{border:0;border-top:1px solid var(--line-2);margin:20px 0}
+  .login-box .register-link{font-size:13px;color:var(--muted);text-align:center;cursor:pointer}
+  .login-box .register-link span{color:var(--accent);text-decoration:underline;cursor:pointer}
+
+  /* ── MAIN APP STYLES (same as original) ── */
+  :root{
+    --bg:#F4F4F2;--canvas:#F8F8F6;--card:#FFFFFF;--ink:#0F0F0E;--ink-2:#3A3A37;
+    --muted:#8C8A85;--line:rgba(15,15,14,.10);--line-2:rgba(15,15,14,.05);
+    --accent: oklch(48% 0.09 152);--accent-soft: oklch(95% 0.025 152);
+    --late: oklch(56% 0.16 28);--late-soft: oklch(95% 0.025 28);
+    --over: oklch(62% 0.13 70);--over-soft: oklch(95% 0.04 70);
+    --rest: oklch(60% 0.03 250);--rest-soft: oklch(95% 0.012 250);
+  }
+  html.dark{
+    --bg:#0F0F0E;--canvas:#171716;--card:#1D1D1B;--ink:#F2F1ED;--ink-2:#CFCDC8;
+    --muted:#7E7C77;--line:rgba(255,253,247,.10);--line-2:rgba(255,253,247,.05);
+    --accent: oklch(72% 0.13 152);--accent-soft: oklch(28% 0.05 152);
+    --late: oklch(70% 0.16 28);--late-soft: oklch(28% 0.05 28);
+    --over: oklch(76% 0.13 70);--over-soft: oklch(28% 0.05 70);
+    --rest: oklch(68% 0.03 250);--rest-soft: oklch(28% 0.012 250);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font-family:'Geist',ui-sans-serif,system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;font-feature-settings:"ss01","cv11";}
+  .mono{font-family:'Geist Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;letter-spacing:-0.01em}
+  .app{min-height:100vh;padding:24px 32px 64px;max-width:1440px;margin:0 auto}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:8px 0 28px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;letter-spacing:-0.01em}
+  .brand-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);
+    box-shadow:0 0 0 4px color-mix(in oklch, var(--accent) 18%, transparent)}
+  .topright{display:flex;align-items:center;gap:22px;font-size:13px;color:var(--ink-2)}
+  .nowclock{font-family:'Geist Mono',monospace;font-size:13px;color:var(--ink);font-variant-numeric:tabular-nums}
+  .user-badge{display:flex;align-items:center;gap:8px;background:var(--canvas);border:1px solid var(--line);border-radius:10px;padding:6px 12px;font-size:13px}
+  .user-badge .logout-btn{appearance:none;border:0;background:transparent;cursor:pointer;font-size:12px;color:var(--muted);padding:0;font-family:inherit}
+  .user-badge .logout-btn:hover{color:var(--late)}
+  .sync-dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+  .sync-dot.syncing{background:var(--over);animation:pulse 1s infinite}
+  .sync-dot.error{background:var(--late)}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:18px;align-items:start}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 24px;position:relative}
+  .card-pad-tight{padding:18px 20px}
+  .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .card-title{font-size:11px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;color:var(--muted)}
+  .card-sub{font-size:11px;color:var(--muted);letter-spacing:0.02em;white-space:nowrap}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;
+    border-radius:999px;font-size:11px;font-weight:500;letter-spacing:0.01em;border:1px solid var(--line)}
+  .pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+  .pill-ok{color:var(--accent);background:var(--accent-soft);border-color:transparent}
+  .pill-late{color:var(--late);background:var(--late-soft);border-color:transparent}
+  .pill-over{color:var(--over);background:var(--over-soft);border-color:transparent}
+  .pill-rest{color:var(--rest);background:var(--rest-soft);border-color:transparent}
+  .pill-ghost{color:var(--muted);background:transparent}
+  .today{display:grid;grid-template-columns:1.05fr 1fr;gap:28px;min-height:360px}
+  .today-left{display:flex;flex-direction:column;gap:14px}
+  .today-date{font-size:13px;color:var(--muted);text-transform:capitalize}
+  .today-hero{display:flex;align-items:baseline;gap:14px;margin-top:-2px}
+  .today-time{font-family:'Geist Mono',monospace;font-size:74px;font-weight:500;
+    letter-spacing:-0.04em;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+  .today-secs{font-family:'Geist Mono',monospace;font-size:18px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .kvs{display:grid;grid-template-columns:1fr 1fr;gap:14px 24px;margin-top:8px}
+  .kv-l{font-size:11px;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase}
+  .kv-v{font-family:'Geist Mono',monospace;font-size:20px;font-weight:500;color:var(--ink);
+    font-variant-numeric:tabular-nums;letter-spacing:-0.01em;margin-top:2px}
+  .kv-sub{font-size:11px;color:var(--muted);margin-top:2px}
+  .today-right{display:flex;flex-direction:column;justify-content:space-between;gap:14px}
+  .ring-wrap{position:relative;width:100%;aspect-ratio:1/1;max-width:240px;margin:auto}
+  .ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+  .ring-label{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)}
+  .ring-val{font-family:'Geist Mono',monospace;font-size:30px;font-weight:500;color:var(--ink);letter-spacing:-0.02em}
+  .ring-goal{font-size:11px;color:var(--muted);font-family:'Geist Mono',monospace}
+  .btn{appearance:none;border:0;cursor:pointer;font-family:inherit;font-size:14px;font-weight:500;
+    letter-spacing:0.01em;padding:14px 22px;border-radius:14px;
+    display:inline-flex;align-items:center;justify-content:center;gap:10px;
+    transition:transform .08s ease,background .15s ease}
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:var(--ink);color:var(--card);width:100%}
+  .btn-primary:hover{background:color-mix(in oklch, var(--ink), var(--accent) 30%)}
+  .btn-danger{background:var(--late);color:#fff;width:100%}
+  .btn-danger:hover{filter:brightness(1.05)}
+  .btn-ghost{background:transparent;color:var(--ink-2);border:1px solid var(--line)}
+  .btn-ghost:hover{background:var(--line-2)}
+  .timeline{margin-top:10px}
+  .timeline-track{position:relative;height:8px;background:var(--line-2);border-radius:99px;overflow:visible}
+  .timeline-seg{position:absolute;top:0;bottom:0;border-radius:99px}
+  .timeline-seg.work{background:var(--accent)}
+  .timeline-seg.lunch{background:var(--rest)}
+  .timeline-seg.over{background:var(--over)}
+  .timeline-now{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--ink);border-radius:2px}
+  .timeline-now::after{content:'';position:absolute;top:-3px;left:-3px;width:8px;height:8px;border-radius:50%;background:var(--ink)}
+  .timeline-ticks{display:flex;justify-content:space-between;margin-top:8px;font-family:'Geist Mono',monospace;font-size:10px;color:var(--muted)}
+  .week-meter{display:flex;align-items:end;justify-content:space-between;gap:8px;height:140px;padding:0 8px}
+  .day-col{flex:1;display:flex;flex-direction:column;align-items:stretch;gap:6px;height:100%}
+  .day-bar-wrap{flex:1;min-height:0;background:var(--line-2);border-radius:8px;position:relative;overflow:hidden;max-width:38px;margin:0 auto;width:100%}
+  .day-bar-wrap.today{outline:2px solid var(--ink);outline-offset:2px}
+  .day-bar{position:absolute;left:0;right:0;bottom:0;background:var(--accent);border-radius:8px;transition:height .4s ease}
+  .day-bar.future{background:repeating-linear-gradient(45deg,var(--line-2) 0 4px,transparent 4px 8px);border:1px dashed var(--line)}
+  .day-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;text-align:center}
+  .day-num{font-family:'Geist Mono',monospace;font-size:11px;color:var(--ink-2);font-variant-numeric:tabular-nums;text-align:center}
+  .week-summary{display:flex;align-items:baseline;justify-content:space-between;gap:18px;padding-top:18px;border-top:1px solid var(--line-2)}
+  .week-total{display:flex;align-items:baseline;gap:10px}
+  .week-total .big{font-family:'Geist Mono',monospace;font-size:38px;font-weight:500;letter-spacing:-0.03em;color:var(--ink)}
+  .week-total .small{color:var(--muted);font-family:'Geist Mono',monospace;font-size:16px}
+  .week-prog{height:6px;background:var(--line-2);border-radius:99px;overflow:hidden;min-width:140px;flex:1;max-width:240px;align-self:center}
+  .week-prog-fill{height:100%;background:var(--accent);border-radius:99px}
+  .week-prog-over{height:100%;background:var(--over)}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+  .cal-h{font-size:10px;color:var(--muted);text-align:center;padding:6px 0;letter-spacing:0.06em;text-transform:uppercase}
+  .cal-cell{min-height:58px;border-radius:10px;background:var(--canvas);border:1px solid transparent;
+    padding:6px 8px;display:flex;flex-direction:column;justify-content:space-between;
+    cursor:pointer;transition:transform .08s ease,border-color .15s ease;min-width:0}
+  .cal-cell:hover{border-color:var(--line);transform:translateY(-1px)}
+  .cal-cell.muted{opacity:.32;cursor:default}
+  .cal-cell.muted:hover{transform:none;border-color:transparent}
+  .cal-cell.weekend{background:transparent;border-color:var(--line-2);cursor:default}
+  .cal-cell.weekend:hover{transform:none}
+  .cal-cell.today{border:1.5px solid var(--ink)}
+  .cal-cell.selected{border:1.5px solid var(--accent);background:var(--accent-soft)}
+  .cal-cell.holiday{background:var(--rest-soft)}
+  .cal-day{font-family:'Geist Mono',monospace;font-size:13px;font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums}
+  .cal-cell.muted .cal-day{color:var(--muted)}
+  .cal-marks{display:flex;gap:3px;align-items:center}
+  .cal-mark{width:6px;height:6px;border-radius:50%}
+  .cal-mark.ok{background:var(--accent)}
+  .cal-mark.late{background:var(--late)}
+  .cal-mark.over{background:var(--over)}
+  .cal-mark.rest{background:var(--rest);opacity:.7}
+  .cal-hours{font-family:'Geist Mono',monospace;font-size:9.5px;color:var(--muted);text-align:right;line-height:1}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:14px 24px}
+  .stat-l{font-size:11px;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase}
+  .stat-v{font-family:'Geist Mono',monospace;font-size:22px;font-weight:500;letter-spacing:-0.01em;color:var(--ink);margin-top:2px}
+  .stat-v.accent{color:var(--accent)}
+  .stat-v.late{color:var(--late)}
+  .stat-v.over{color:var(--over)}
+  .stat-sub{font-size:11px;color:var(--muted);margin-top:2px;font-family:'Geist Mono',monospace}
+  .hist{margin-top:18px}
+  .hist-table{width:100%;border-collapse:collapse;font-size:13px}
+  .hist-table th{text-align:left;font-weight:500;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);padding:10px 12px;border-bottom:1px solid var(--line-2)}
+  .hist-table td{padding:14px 12px;border-bottom:1px solid var(--line-2);color:var(--ink);vertical-align:middle}
+  .hist-table tr:last-child td{border-bottom:0}
+  .hist-table tbody tr{cursor:pointer;transition:background .12s ease}
+  .hist-table tbody tr:hover{background:var(--line-2)}
+  .hist-table .right{text-align:right}
+  .hist-date{display:flex;align-items:center;gap:10px}
+  .hist-date .dnum{font-family:'Geist Mono',monospace;font-weight:500;min-width:24px;color:var(--ink)}
+  .hist-date .dname{color:var(--muted);font-size:12px;text-transform:capitalize}
+  .hist-time{font-family:'Geist Mono',monospace;font-size:13px;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .modal-bg{position:fixed;inset:0;background:rgba(20,18,14,.4);backdrop-filter:blur(6px);
+    display:flex;align-items:center;justify-content:center;z-index:1000;animation:fadeIn .15s ease}
+  .modal{background:var(--card);border:1px solid var(--line);border-radius:20px;
+    padding:28px;width:520px;max-width:calc(100vw - 40px);box-shadow:0 30px 80px rgba(0,0,0,.25);animation:popIn .2s ease}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes popIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+  .modal-head{display:flex;align-items:start;justify-content:space-between;margin-bottom:18px}
+  .modal h2{margin:0;font-size:22px;font-weight:500;letter-spacing:-0.02em;text-transform:capitalize}
+  .modal h2 small{display:block;font-size:13px;color:var(--muted);font-weight:400;letter-spacing:0;text-transform:none;margin-top:2px}
+  .modal-x{appearance:none;border:0;background:var(--line-2);width:32px;height:32px;border-radius:10px;cursor:pointer;color:var(--ink-2);font-size:16px}
+  .modal-x:hover{background:var(--line)}
+  .modal-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+  .modal-stat{background:var(--canvas);border-radius:12px;padding:12px 14px}
+  .modal-stat .l{font-size:10px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase}
+  .modal-stat .v{font-family:'Geist Mono',monospace;font-size:18px;color:var(--ink);margin-top:4px}
+  .modal-stat .v.late{color:var(--late)}
+  .modal-stat .v.over{color:var(--over)}
+  .modal-section{margin-bottom:16px}
+  .modal-section h3{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin:0 0 8px 0}
+  .time-inputs{display:flex;gap:10px}
+  .time-input{flex:1;background:var(--canvas);border:1px solid var(--line-2);border-radius:10px;
+    padding:10px 12px;font-family:'Geist Mono',monospace;font-size:16px;color:var(--ink);width:100%}
+  .time-input:focus{outline:none;border-color:var(--accent)}
+  .note-input{width:100%;background:var(--canvas);border:1px solid var(--line-2);border-radius:10px;
+    padding:10px 12px;font-family:inherit;font-size:13px;color:var(--ink);resize:vertical;min-height:60px}
+  .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:18px;border-top:1px solid var(--line-2)}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px}
+  .legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+  .legend-swatch{width:8px;height:8px;border-radius:50%}
+  .seg{display:inline-flex;background:var(--canvas);border-radius:10px;padding:3px;gap:2px}
+  .seg button{appearance:none;border:0;background:transparent;padding:6px 12px;border-radius:8px;font-size:12px;color:var(--muted);cursor:pointer;font-family:inherit;font-weight:500}
+  .seg button.active{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.05)}
+  .status-block{display:flex;align-items:center;gap:10px;margin-top:6px}
+  @media(max-width:1100px){.grid{grid-template-columns:1fr}.today{grid-template-columns:1fr}}
+  .export-wrap{position:relative}
+  .export-menu{position:absolute;top:calc(100% + 6px);right:0;min-width:260px;z-index:500;
+    background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px;
+    box-shadow:0 14px 40px rgba(0,0,0,.10),0 2px 6px rgba(0,0,0,.04);
+    display:flex;flex-direction:column;gap:2px;animation:popIn .12s ease}
+  .export-menu .export-section{font-size:10px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;color:var(--muted);padding:8px 10px 4px}
+  .export-menu button{appearance:none;border:0;background:transparent;display:flex;align-items:center;justify-content:space-between;padding:9px 10px;border-radius:8px;font-family:inherit;font-size:13px;color:var(--ink);cursor:pointer;text-align:left;width:100%}
+  .export-menu button:hover{background:var(--line-2)}
+  .export-menu .ext{font-family:'Geist Mono',monospace;font-size:11px;color:var(--muted)}
+  @media print{
+    @page{size:A4;margin:14mm}
+    body{background:#fff!important}
+    .export-wrap,.modal-bg,.btn-primary,.btn-danger,.seg,.ring-wrap>svg,.user-badge{display:none!important}
+    .topbar{padding:0 0 16px;border-bottom:1px solid #ddd;margin-bottom:18px}
+    .app{padding:0;max-width:none}
+    .card{break-inside:avoid;box-shadow:none;border:1px solid #ccc!important;margin-bottom:12px}
+    .grid{grid-template-columns:1fr!important;gap:12px!important}
+    .today{grid-template-columns:1fr!important}
+    .today-right .btn{display:none!important}
+    .ring-wrap{display:none!important}
+    .hist-table tbody tr{cursor:default}
+    button{display:none!important}
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+// ── SUPABASE CONFIG ──────────────────────────────────────────
+// Reemplaza estos valores con los de tu proyecto en supabase.com
+const SUPABASE_URL = 'https://fkrnkwvvssskbsjqmvex.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrcm5rd3Z2c3Nza2JzanFtdmV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NzY0NjYsImV4cCI6MjA5NDM1MjQ2Nn0.9jNoL--rtJc0nahXm60t3evi0g6K9pLfZ8EljDE20VM';
+// ─────────────────────────────────────────────────────────────
+
+const isConfigured = SUPABASE_URL !== 'TU_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'TU_SUPABASE_ANON_KEY';
+</script>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useMemo, useRef, useCallback } = React;
+
+// ── Supabase client ──────────────────────────────────────────
+let supabase = null;
+const getSupabase = () => {
+  if (!isConfigured) return null;
+  if (supabase) return supabase;
+  const lib = window.supabase || window.Supabase;
+  if (lib && lib.createClient) {
+    supabase = lib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    return supabase;
+  }
+  return null;
+};
+
+// ── Time helpers ─────────────────────────────────────────────
+const parseHM = (s) => { if (!s) return null; const [h,m]=String(s).split(':').map(Number); return (h||0)*60+(m||0); };
+const fmtHM   = (mins) => { if(mins==null)return'—'; const m=Math.max(0,Math.round(mins)); return `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`; };
+const fmtHrs  = (mins,opts={}) => { if(mins==null)return'—'; const m=Math.max(0,Math.round(mins)); const h=Math.floor(m/60); const mm=m%60; if(opts.short&&h===0)return`${mm} min`; return`${h}h ${String(mm).padStart(2,'0')}m`; };
+const DAY_SHORT  = ['dom','lun','mar','mié','jue','vie','sáb'];
+const DAY_FULL   = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const MONTH_FULL = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const dateKey  = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const fromKey  = (k) => { const [y,m,d]=k.split('-').map(Number); return new Date(y,m-1,d); };
+const isWeekend= (d) => d.getDay()===0||d.getDay()===6;
+const weekStart= (d) => { const dow=d.getDay(); const diff=dow===0?-6:1-dow; return new Date(d.getFullYear(),d.getMonth(),d.getDate()+diff); };
+
+// ── Feriados Perú ─────────────────────────────────────────
+const FERIADOS_PERU = (year) => {
+  // Feriados fijos
+  const fixed = [
+    `${year}-01-01`, // Año Nuevo
+    `${year}-05-01`, // Día del Trabajo
+    `${year}-06-29`, // San Pedro y San Pablo
+    `${year}-07-23`, // Día de la Fuerza Aérea (no oficial pero común)
+    `${year}-07-28`, // Fiestas Patrias
+    `${year}-07-29`, // Fiestas Patrias
+    `${year}-08-06`, // Batalla de Junín
+    `${year}-08-30`, // Santa Rosa de Lima
+    `${year}-10-08`, // Combate de Angamos
+    `${year}-11-01`, // Todos los Santos
+    `${year}-12-08`, // Inmaculada Concepción
+    `${year}-12-09`, // Batalla de Ayacucho
+    `${year}-12-25`, // Navidad
+  ];
+  // Semana Santa (variable) - aproximación para años comunes
+  const easter = getEaster(year);
+  const viernesSanto = new Date(easter); viernesSanto.setDate(easter.getDate()-2);
+  const juevesSanto = new Date(easter); juevesSanto.setDate(easter.getDate()-3);
+  fixed.push(dateKey(juevesSanto));
+  fixed.push(dateKey(viernesSanto));
+  return new Set(fixed);
+};
+const getEaster = (year) => {
+  const a=year%19,b=Math.floor(year/100),c=year%100,d=Math.floor(b/4),e=b%4,
+    f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,
+    i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,
+    m=Math.floor((a+11*h+22*l)/451),
+    month=Math.floor((h+l-7*m+114)/31),
+    day=((h+l-7*m+114)%31)+1;
+  return new Date(year,month-1,day);
+};
+const isHolidayPeru = (dateObj) => {
+  const feriados = FERIADOS_PERU(dateObj.getFullYear());
+  return feriados.has(dateKey(dateObj));
+};
+const isWorkday = (dateObj) => !isWeekend(dateObj) && !isHolidayPeru(dateObj);
+
+// Días laborables en un mes
+const workdaysInMonth = (year, monthIdx) => {
+  const last = new Date(year, monthIdx+1, 0).getDate();
+  let count = 0;
+  for(let d=1; d<=last; d++){
+    const date = new Date(year, monthIdx, d);
+    if(isWorkday(date)) count++;
+  }
+  return count;
+};
+
+// Días laborables hasta hoy (inclusive) en un mes
+const workdaysToDate = (year, monthIdx, todayKey) => {
+  const last = new Date(year, monthIdx+1, 0).getDate();
+  let count = 0;
+  for(let d=1; d<=last; d++){
+    const date = new Date(year, monthIdx, d);
+    const k = dateKey(date);
+    if(k > todayKey) break;
+    if(isWorkday(date)) count++;
+  }
+  return count;
+};
+
+// Días laborables en la semana actual
+const workdaysInWeek = (weekStartDate) => {
+  let count = 0;
+  for(let i=0; i<7; i++){
+    const d = new Date(weekStartDate.getFullYear(), weekStartDate.getMonth(), weekStartDate.getDate()+i);
+    if(isWorkday(d)) count++;
+  }
+  return count;
+};
+
+// ── Domain calc ──────────────────────────────────────────────
+function calcDay(rec,cfg,nowMin=null){
+  if(!rec||rec.holiday)return null;
+  const sStart=parseHM(cfg.scheduleStart); const sEnd=parseHM(cfg.scheduleEnd); const lunch=cfg.lunchMin;
+  const lunchStart=sStart+Math.floor((sEnd-sStart-lunch)/2); const lunchEnd=lunchStart+lunch;
+  const expected=sEnd-sStart-lunch;
+  const entry=rec.entry; const exitRaw=rec.exit; const inProgress=exitRaw==null;
+  const exit=inProgress?nowMin:exitRaw;
+  if(entry==null||exit==null)return null;
+  const tard=Math.max(0,entry-sStart); const scheduledExit=sEnd+tard; const onSite=Math.max(0,exit-entry);
+  const lunchDeduct=inProgress&&exit<lunchEnd?Math.max(0,exit-lunchStart):lunch;
+  const worked=Math.max(0,onSite-lunchDeduct); const dailyOver=Math.max(0,exit-scheduledExit);
+  return{entry,exit,exitRaw,inProgress,tard,scheduledExit,onSite,worked,dailyOver,expected,lunchStart,lunchEnd,lunchDeduct,note:rec.note};
+}
+
+function calcWeek(records,anchor,cfg,nowMin){
+  const start=weekStart(anchor); const days=[]; let totalWorked=0,totalTard=0,totalDailyOver=0,daysWorked=0;
+  for(let i=0;i<7;i++){
+    const d=new Date(start.getFullYear(),start.getMonth(),start.getDate()+i);
+    const k=dateKey(d); const rec=records[k]; const calc=calcDay(rec,cfg,nowMin);
+    days.push({date:d,key:k,rec,calc});
+    if(calc){totalWorked+=calc.worked;totalTard+=calc.tard;totalDailyOver+=calc.dailyOver;if(calc.worked>0)daysWorked++;}
+  }
+  const goal=cfg.weeklyGoal*60; const weeklyOver=Math.max(0,totalWorked-goal);
+  return{start,days,totalWorked,totalTard,totalDailyOver,weeklyOver,daysWorked,goal};
+}
+
+function calcMonth(records,year,monthIdx,cfg,nowMin,todayKey){
+  let totalWorked=0,totalTard=0,totalOver=0,daysWorked=0;
+  const goalDaily=cfg.dailyGoal*60; // 9h en minutos
+  // Meta total del mes = días laborables del mes * 9h
+  const totalWorkdays=workdaysInMonth(year,monthIdx);
+  const goalMonth=totalWorkdays*goalDaily;
+  // Meta a la fecha = días laborables hasta hoy * 9h
+  const workdaysHoy=workdaysToDate(year,monthIdx,todayKey);
+  const goalToDate=workdaysHoy*goalDaily;
+  for(const[k,rec]of Object.entries(records)){
+    const d=fromKey(k); if(d.getFullYear()!==year||d.getMonth()!==monthIdx)continue;
+    const calc=rec?calcDay(rec,cfg,nowMin):null;
+    if(calc){
+      totalWorked+=calc.worked;
+      totalTard+=calc.tard;
+      if(calc.worked>0)daysWorked++;
+      // Extras por día: lo que trabajó sobre la meta diaria de 9h
+      totalOver+=Math.max(0,calc.worked-goalDaily);
+    }
+  }
+  return{totalWorked,totalTard,totalOver,daysWorked,goalToDate,goalMonth,totalWorkdays,workdaysHoy};
+}
+
+// ── CONFIG SCREEN (when not yet configured) ──────────────────
+function ConfigScreen(){
+  const [url,setUrl]=useState('');
+  const [key,setKey]=useState('');
+  const save=()=>{
+    if(!url||!key)return;
+    const code=`const SUPABASE_URL = '${url}';\nconst SUPABASE_ANON_KEY = '${key}';`;
+    alert('Copia estos valores al archivo index.html en las líneas SUPABASE_URL y SUPABASE_ANON_KEY:\n\n'+code);
+  };
+  return(
+    <div className="config-notice">
+      <div className="config-box">
+        <h1>⚙️ Configurar Supabase</h1>
+        <p>Para activar la base de datos, necesitas las credenciales de tu proyecto Supabase. Ve a <strong style={{color:'#F2F1ED'}}>supabase.com → Project Settings → API</strong></p>
+        <label style={{display:'block',fontSize:11,color:'#7E7C77',marginBottom:6,letterSpacing:'.08em',textTransform:'uppercase'}}>Project URL</label>
+        <input placeholder="https://xxxx.supabase.co" value={url} onChange={e=>setUrl(e.target.value)}/>
+        <label style={{display:'block',fontSize:11,color:'#7E7C77',marginBottom:6,letterSpacing:'.08em',textTransform:'uppercase'}}>Anon Public Key</label>
+        <input placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." value={key} onChange={e=>setKey(e.target.value)}/>
+        <button onClick={save}>Mostrar instrucciones</button>
+        <p className="hint">📖 Ver instrucciones completas en el archivo <strong>INSTRUCCIONES.md</strong> incluido en el ZIP</p>
+      </div>
+    </div>
+  );
+}
+
+// ── LOGIN SCREEN ─────────────────────────────────────────────
+function LoginScreen({onLogin}){
+  const [mode,setMode]=useState('login'); // 'login' | 'register'
+  const [name,setName]=useState('');
+  const [email,setEmail]=useState('');
+  const [password,setPassword]=useState('');
+  const [error,setError]=useState('');
+  const [loading,setLoading]=useState(false);
+
+  const handle=async()=>{
+    setError(''); setLoading(true);
+    try{
+      if(mode==='register'){
+        const{data,error:err}=await supabase.auth.signUp({email,password,options:{data:{full_name:name}}});
+        if(err)throw err;
+        if(data.user) onLogin(data.user);
+      } else {
+        const{data,error:err}=await supabase.auth.signInWithPassword({email,password});
+        if(err)throw err;
+        onLogin(data.user);
+      }
+    }catch(e){setError(e.message);}
+    setLoading(false);
+  };
+
+  return(
+    <div className="login-screen">
+      <div className="login-box">
+        <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:20}}>
+          <div className="brand-dot"/>
+          <span style={{fontWeight:600,fontSize:15}}>Sistema de Asistencia</span>
+        </div>
+        <h2>{mode==='login'?'Iniciar sesión':'Crear cuenta'}</h2>
+        <p>{mode==='login'?'Ingresa con tu cuenta de empleado':'Regístrate con tu correo corporativo'}</p>
+        {mode==='register'&&(
+          <>
+            <label>Nombre completo</label>
+            <input type="text" placeholder="Juan Pérez" value={name} onChange={e=>setName(e.target.value)}/>
+          </>
+        )}
+        <label>Correo electrónico</label>
+        <input type="email" placeholder="juan@empresa.com" value={email} onChange={e=>setEmail(e.target.value)}
+          onKeyDown={e=>e.key==='Enter'&&handle()}/>
+        <label>Contraseña</label>
+        <input type="password" placeholder="••••••••" value={password} onChange={e=>setPassword(e.target.value)}
+          onKeyDown={e=>e.key==='Enter'&&handle()}/>
+        {error&&<div className="login-err">⚠ {error}</div>}
+        <button className="login-btn" onClick={handle} disabled={loading}>
+          {loading?'Procesando...':(mode==='login'?'Entrar':'Registrarme')}
+        </button>
+        <hr className="login-sep"/>
+        <div className="register-link">
+          {mode==='login'?<>¿No tienes cuenta? <span onClick={()=>setMode('register')}>Regístrate</span></>
+                        :<>¿Ya tienes cuenta? <span onClick={()=>setMode('login')}>Inicia sesión</span></>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── TOPBAR ────────────────────────────────────────────────────
+function Topbar({now,user,syncStatus,exportOpen,setExportOpen,onExportCSV,onExportPDF,onLogout}){
+  const h=String(now.getHours()).padStart(2,'0');
+  const m=String(now.getMinutes()).padStart(2,'0');
+  const s=String(now.getSeconds()).padStart(2,'0');
+  const displayName=user?.user_metadata?.full_name||user?.email?.split('@')[0]||'Usuario';
+  return(
+    <div className="topbar">
+      <div className="brand"><div className="brand-dot"/>Sistema de Asistencia</div>
+      <div className="topright">
+        <span className="nowclock">{h}:{m}:{s}</span>
+        <div className="user-badge">
+          <div className={`sync-dot ${syncStatus}`} title={syncStatus==='ok'?'Sincronizado':syncStatus==='syncing'?'Guardando...':'Error al guardar'}/>
+          <span>{displayName}</span>
+          <button className="logout-btn" onClick={onLogout}>salir</button>
+        </div>
+        <div className="export-wrap">
+          <button className="btn btn-ghost" style={{padding:'8px 14px',fontSize:13}} onClick={()=>setExportOpen(o=>!o)}>
+            Exportar ↓
+          </button>
+          {exportOpen&&(
+            <div className="export-menu">
+              <div className="export-section">CSV</div>
+              <button onClick={()=>{onExportCSV('week');setExportOpen(false);}}>Esta semana<span className="ext">.csv</span></button>
+              <button onClick={()=>{onExportCSV('month');setExportOpen(false);}}>Este mes<span className="ext">.csv</span></button>
+              <button onClick={()=>{onExportCSV('all');setExportOpen(false);}}>Todo<span className="ext">.csv</span></button>
+              <div className="export-section">PDF</div>
+              <button onClick={()=>{onExportPDF();setExportOpen(false);}}>Imprimir / PDF<span className="ext">.pdf</span></button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── TODAY CARD ────────────────────────────────────────────────
+function TodayCard({now,todayRec,todayCalc,cfg,nowMin,onMarkEntry,onMarkExit,onUndoExit}){
+  const h=String(now.getHours()).padStart(2,'0');
+  const m=String(now.getMinutes()).padStart(2,'0');
+  const s=String(now.getSeconds()).padStart(2,'0');
+  const dayStr=`${DAY_FULL[now.getDay()]}, ${now.getDate()} de ${MONTH_FULL[now.getMonth()]}`;
+  const hasEntry=todayRec?.entry!=null; const hasExit=todayRec?.exit!=null;
+  const sStart=parseHM(cfg.scheduleStart); const sEnd=parseHM(cfg.scheduleEnd);
+  const span=sEnd-sStart+60;
+  const pct=(v)=>Math.min(100,Math.max(0,((v-sStart+30)/span)*100));
+  return(
+    <div className="card">
+      <div className="today">
+        <div className="today-left">
+          <div className="today-date">{dayStr}</div>
+          <div className="today-hero">
+            <div className="today-time">{h}:{m}</div>
+            <div className="today-secs">{s}</div>
+          </div>
+          <div className="status-block">
+            {!hasEntry&&<span className="pill pill-ghost"><span className="dot"/>Sin registrar</span>}
+            {hasEntry&&!hasExit&&<span className="pill pill-ok"><span className="dot"/>En curso</span>}
+            {hasExit&&<span className="pill pill-rest"><span className="dot"/>Completado</span>}
+            {todayCalc?.tard>0&&<span className="pill pill-late"><span className="dot"/>+{fmtHrs(todayCalc.tard,{short:true})} tardanza</span>}
+            {todayCalc?.dailyOver>0&&<span className="pill pill-over"><span className="dot"/>+{fmtHrs(todayCalc.dailyOver,{short:true})} extras</span>}
+          </div>
+          <div className="kvs">
+            <div><div className="kv-l">Entrada</div><div className="kv-v">{hasEntry?fmtHM(todayRec.entry):'—'}</div></div>
+            <div><div className="kv-l">Salida</div><div className="kv-v">{hasExit?fmtHM(todayRec.exit):hasEntry?<span style={{color:'var(--muted)',fontSize:16}}>en curso</span>:'—'}</div></div>
+            <div><div className="kv-l">Trabajadas</div><div className="kv-v">{todayCalc?fmtHrs(todayCalc.worked,{short:true}):'—'}</div><div className="kv-sub">meta {cfg.scheduleEnd}</div></div>
+            <div><div className="kv-l">En oficina</div><div className="kv-v">{todayCalc?fmtHrs(todayCalc.onSite,{short:true}):'—'}</div></div>
+          </div>
+          {hasEntry&&(
+            <div className="timeline">
+              <div className="timeline-track">
+                {todayCalc&&<div className="timeline-seg work" style={{left:`${pct(todayCalc.entry)}%`,right:`${100-pct(Math.min(todayCalc.exit??nowMin,sEnd))}%`}}/>}
+                {todayCalc&&<div className="timeline-seg lunch" style={{left:`${pct(todayCalc.lunchStart)}%`,width:`${(todayCalc.lunchEnd-todayCalc.lunchStart)/span*100}%`}}/>}
+                {todayCalc?.dailyOver>0&&<div className="timeline-seg over" style={{left:`${pct(todayCalc.scheduledExit)}%`,right:`${100-pct(todayCalc.exit??nowMin)}%`}}/>}
+                <div className="timeline-now" style={{left:`${pct(nowMin)}%`}}/>
+              </div>
+              <div className="timeline-ticks"><span>{cfg.scheduleStart}</span><span>{cfg.scheduleEnd}</span></div>
+            </div>
+          )}
+        </div>
+        <div className="today-right">
+          <div className="ring-wrap">
+            <svg viewBox="0 0 120 120" style={{width:'100%',height:'100%',transform:'rotate(-90deg)'}}>
+              <circle cx="60" cy="60" r="50" fill="none" stroke="var(--line-2)" strokeWidth="10"/>
+              <circle cx="60" cy="60" r="50" fill="none" stroke={todayCalc?.dailyOver>0?'var(--over)':'var(--accent)'}
+                strokeWidth="10" strokeLinecap="round"
+                strokeDasharray={`${2*Math.PI*50}`}
+                strokeDashoffset={`${2*Math.PI*50*(1-Math.min(1,(todayCalc?.worked||0)/(todayCalc?.expected||480)))}`}
+                style={{transition:'stroke-dashoffset .5s ease'}}/>
+            </svg>
+            <div className="ring-center">
+              <div className="ring-label">Progreso</div>
+              <div className="ring-val">{todayCalc?`${Math.round((todayCalc.worked/todayCalc.expected)*100)}%`:'0%'}</div>
+              <div className="ring-goal">{todayCalc?fmtHrs(todayCalc.worked,{short:true}):'—'} / {fmtHrs(todayCalc?.expected??480,{short:true})}</div>
+            </div>
+          </div>
+          <div style={{display:'flex',flexDirection:'column',gap:8}}>
+            {!hasEntry&&<button className="btn btn-primary" onClick={onMarkEntry}>▶ Marcar entrada</button>}
+            {hasEntry&&!hasExit&&<button className="btn btn-danger" onClick={onMarkExit}>■ Marcar salida</button>}
+            {hasExit&&<button className="btn btn-ghost" onClick={onUndoExit}>↩ Deshacer salida</button>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── WEEK CARD ─────────────────────────────────────────────────
+function WeekCard({week,cfg}){
+  const goal=cfg.weeklyGoal*60;
+  const pct=Math.min(100,(week.totalWorked/goal)*100);
+  const over=week.totalWorked>goal;
+  const wdCount=workdaysInWeek(week.start);
+  const weekGoalHrs=wdCount*cfg.dailyGoal;
+  const weekGoalMin=weekGoalHrs*60;
+  const pctReal=Math.min(100,(week.totalWorked/weekGoalMin)*100);
+  return(
+    <div className="card card-pad-tight">
+      <div className="card-head">
+        <div className="card-title">Esta semana</div>
+        <div style={{display:'flex',gap:12,fontSize:12,color:'var(--muted)',fontFamily:'Geist Mono,monospace'}}>
+          <span>meta: <strong style={{color:'var(--ink)'}}>{weekGoalHrs}h</strong> ({wdCount} días lab.)</span>
+        </div>
+      </div>
+      <div className="week-meter">
+        {week.days.map(({date,key,calc})=>{
+          const isToday=dateKey(new Date())===key; const isFuture=date>new Date()&&!isToday;
+          const barH=isFuture?0:calc?Math.min(100,(calc.worked/(cfg.weeklyGoal*60/5))*100):0;
+          return(
+            <div key={key} className="day-col">
+              <div className={`day-bar-wrap${isToday?' today':''}`}>
+                <div className={`day-bar${isFuture?' future':''}`} style={{height:`${barH}%`,background:calc?.tard>0?'var(--late)':calc?.dailyOver>0?'var(--over)':'var(--accent)'}}/>
+              </div>
+              <div className="day-label">{DAY_SHORT[date.getDay()]}</div>
+              <div className="day-num">{date.getDate()}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="week-summary">
+        <div className="week-total">
+          <span className="big">{fmtHrs(week.totalWorked,{short:true})}</span>
+          <span className="small">/ {weekGoalHrs}h</span>
+        </div>
+        <div className="week-prog">
+          {week.totalWorked>=weekGoalMin
+            ?<div className="week-prog-over" style={{width:'100%'}}/>
+            :<div className="week-prog-fill" style={{width:`${pctReal}%`}}/>}
+        </div>
+        {week.totalWorked>=weekGoalMin
+          ?<span className="pill pill-ok"><span className="dot"/>✓ Meta</span>
+          :<span style={{fontSize:11,color:'var(--muted)',fontFamily:'Geist Mono,monospace',whiteSpace:'nowrap'}}>{Math.round(pctReal)}%</span>}
+      </div>
+    </div>
+  );
+}
+
+// ── MONTH CALENDAR ────────────────────────────────────────────
+function MonthCalendar({records,cfg,nowMin,todayKey,viewMonth,onSetViewMonth,onPick,selected}){
+  const {y,m}=viewMonth;
+  const first=new Date(y,m,1); const lastDay=new Date(y,m+1,0).getDate();
+  const startDow=first.getDay()===0?6:first.getDay()-1;
+  const cells=[];
+  for(let i=0;i<startDow;i++)cells.push(null);
+  for(let d=1;d<=lastDay;d++)cells.push(d);
+  while(cells.length%7!==0)cells.push(null);
+  const prevMonth=()=>onSetViewMonth(m===0?{y:y-1,m:11}:{y,m:m-1});
+  const nextMonth=()=>onSetViewMonth(m===11?{y:y+1,m:0}:{y,m:m+1});
+  return(
+    <div className="card card-pad-tight">
+      <div className="card-head">
+        <button className="btn btn-ghost" style={{padding:'4px 10px',fontSize:13}} onClick={prevMonth}>‹</button>
+        <div className="card-title">{MONTH_FULL[m]} {y}</div>
+        <button className="btn btn-ghost" style={{padding:'4px 10px',fontSize:13}} onClick={nextMonth}>›</button>
+      </div>
+      <div className="cal-grid">
+        {['lun','mar','mié','jue','vie','sáb','dom'].map(d=><div key={d} className="cal-h">{d}</div>)}
+        {cells.map((d,i)=>{
+          if(!d)return<div key={i}/>;
+          const k=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+          const date=fromKey(k); const rec=records[k]; const calc=calcDay(rec,cfg,nowMin);
+          const isWE=isWeekend(date); const isToday=k===todayKey; const isSel=k===selected;
+          const cls=['cal-cell',isWE?'weekend':'',isToday?'today':'',isSel?'selected':'',rec?.holiday?'holiday':''].filter(Boolean).join(' ');
+          return(
+            <div key={k} className={cls} onClick={()=>!isWE&&onPick(k)}>
+              <div className="cal-day">{d}</div>
+              <div>
+                <div className="cal-marks">
+                  {rec?.holiday&&<span className="cal-mark rest"/>}
+                  {calc&&calc.tard>0&&<span className="cal-mark late"/>}
+                  {calc&&calc.dailyOver>0&&<span className="cal-mark over"/>}
+                  {calc&&calc.tard===0&&<span className="cal-mark ok"/>}
+                </div>
+                {calc&&<div className="cal-hours">{fmtHrs(calc.worked,{short:true})}</div>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── MONTH SUMMARY ─────────────────────────────────────────────
+function MonthSummary({records,cfg,nowMin,todayKey,viewMonth}){
+  const mc=calcMonth(records,viewMonth.y,viewMonth.m,cfg,nowMin,todayKey);
+  return(
+    <div className="card card-pad-tight">
+      <div className="card-head"><div className="card-title">Resumen del mes</div><div className="card-sub">{MONTH_FULL[viewMonth.m]} {viewMonth.y}</div></div>
+      <div className="stats">
+        <div style={{gridColumn:'1/-1'}}>
+          <div className="stat-l">Meta mensual · {mc.totalWorkdays} días laborables</div>
+          <div style={{display:'flex',alignItems:'baseline',gap:8,marginTop:4,flexWrap:'wrap'}}>
+            <div className="stat-v accent">{fmtHrs(mc.totalWorked,{short:true})}</div>
+            <div style={{fontSize:13,color:'var(--muted)',fontFamily:'Geist Mono,monospace'}}>/ {fmtHrs(mc.goalToDate,{short:true})} a la fecha</div>
+            <div style={{fontSize:13,color:'var(--muted)',fontFamily:'Geist Mono,monospace'}}>(meta total: {fmtHrs(mc.goalMonth,{short:true})})</div>
+            {mc.totalWorked>=mc.goalToDate&&mc.goalToDate>0&&<span className="pill pill-ok" style={{fontSize:10,padding:'2px 8px'}}>✓ Al día</span>}
+          </div>
+          <div style={{height:8,background:'var(--line-2)',borderRadius:99,overflow:'hidden',marginTop:8,position:'relative'}}>
+            <div style={{position:'absolute',top:0,left:0,height:'100%',borderRadius:99,background:'var(--line)',width:`${mc.goalToDate>0?Math.min(100,(mc.goalToDate/mc.goalMonth)*100):0}%`}}/>
+            <div style={{position:'absolute',top:0,left:0,height:'100%',borderRadius:99,background:mc.totalWorked>=mc.goalToDate?'var(--accent)':'var(--accent)',width:`${Math.min(100,mc.goalMonth>0?(mc.totalWorked/mc.goalMonth)*100:0)}%`,transition:'width .4s ease'}}/>
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',marginTop:4}}>
+            <div style={{fontSize:11,color:'var(--muted)',fontFamily:'Geist Mono,monospace'}}>{mc.workdaysHoy} de {mc.totalWorkdays} días laborables transcurridos</div>
+            <div style={{fontSize:11,color:'var(--muted)',fontFamily:'Geist Mono,monospace'}}>{mc.goalMonth>0?`${Math.round(Math.min(100,(mc.totalWorked/mc.goalMonth)*100))}%`:''}</div>
+          </div>
+        </div>
+        <div><div className="stat-l">Días trabajados</div><div className="stat-v">{mc.daysWorked}</div><div className="stat-sub">de {mc.workdaysHoy} esperados</div></div>
+        <div><div className="stat-l">Total tardanzas</div><div className={`stat-v${mc.totalTard>0?' late':''}`}>{fmtHrs(mc.totalTard,{short:true})}</div></div>
+        <div style={{gridColumn:'1/-1',borderTop:'1px solid var(--line-2)',paddingTop:12,marginTop:4}}>
+          <div className="stat-l">Horas extras acumuladas</div>
+          <div className={`stat-v${mc.totalOver>0?' over':''}`} style={{marginTop:4}}>{mc.totalOver>0?`+${fmtHrs(mc.totalOver,{short:true})}`:'0 min'}</div>
+          <div className="stat-sub">{mc.totalOver>0?`Acumulado este mes (días con más de 9h trabajadas)`:'Sin horas extras este mes'}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── HISTORY TABLE ─────────────────────────────────────────────
+function HistoryCard({records,cfg,nowMin,todayKey,filter,onFilter,anchor,month,onPick}){
+  const entries=useMemo(()=>{
+    const all=Object.entries(records).map(([k,rec])=>({k,rec,date:fromKey(k)})).sort((a,b)=>b.k.localeCompare(a.k));
+    if(filter==='week'){const ws=weekStart(anchor);const we=new Date(ws.getFullYear(),ws.getMonth(),ws.getDate()+7);return all.filter(({date})=>date>=ws&&date<we);}
+    if(filter==='month'){return all.filter(({date})=>date.getFullYear()===month.y&&date.getMonth()===month.m);}
+    return all;
+  },[records,filter,anchor,month]);
+  return(
+    <div className="card">
+      <div className="card-head">
+        <div className="card-title">Historial</div>
+        <div className="seg">
+          <button className={filter==='week'?'active':''} onClick={()=>onFilter('week')}>Semana</button>
+          <button className={filter==='month'?'active':''} onClick={()=>onFilter('month')}>Mes</button>
+          <button className={filter==='all'?'active':''} onClick={()=>onFilter('all')}>Todo</button>
+        </div>
+      </div>
+      <table className="hist-table">
+        <thead><tr><th>Fecha</th><th>Entrada</th><th>Salida</th><th className="right">Trabajadas</th><th className="right">Tardanza</th><th className="right">Extras</th><th>Nota</th></tr></thead>
+        <tbody>
+          {entries.length===0&&<tr><td colSpan={7} style={{color:'var(--muted)',padding:'24px 12px',textAlign:'center'}}>Sin registros</td></tr>}
+          {entries.map(({k,rec,date})=>{
+            const calc=calcDay(rec,cfg,nowMin);
+            return(
+              <tr key={k} onClick={()=>onPick(k)}>
+                <td><div className="hist-date"><span className="dnum">{String(date.getDate()).padStart(2,'0')}</span><span className="dname">{DAY_SHORT[date.getDay()]} {MONTH_FULL[date.getMonth()].slice(0,3)}</span>{k===todayKey&&<span className="pill pill-ok" style={{padding:'2px 8px',fontSize:10}}>Hoy</span>}</div></td>
+                {rec.holiday?<td colSpan={5}><span className="pill pill-rest"><span className="dot"/>{rec.holiday}</span></td>:(
+                  <>
+                    <td className="hist-time">{rec.entry!=null?fmtHM(rec.entry):'—'}</td>
+                    <td className="hist-time">{rec.exit!=null?fmtHM(rec.exit):<span style={{color:'var(--muted)'}}>en curso</span>}</td>
+                    <td className="right hist-time">{calc?fmtHrs(calc.worked,{short:true}):'—'}</td>
+                    <td className="right hist-time" style={{color:calc?.tard>0?'var(--late)':'var(--muted)'}}>{calc?.tard>0?`+${fmtHrs(calc.tard,{short:true})}`:'—'}</td>
+                    <td className="right hist-time" style={{color:calc?.dailyOver>0?'var(--over)':'var(--muted)'}}>{calc?.dailyOver>0?`+${fmtHrs(calc.dailyOver,{short:true})}`:'—'}</td>
+                  </>
+                )}
+                {!rec.holiday&&<td style={{color:'var(--muted)',fontSize:12,maxWidth:200,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{rec.note||''}</td>}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// ── DAY DETAIL MODAL ──────────────────────────────────────────
+function DayDetailModal({dateKey:dk,rec,cfg,nowMin,todayKey,onClose,onUpdate,onClear}){
+  const date=fromKey(dk); const calc=calcDay(rec,cfg,nowMin);
+  const[entry,setEntry]=useState(rec?.entry!=null?fmtHM(rec.entry):'');
+  const[exit,setExit]=useState(rec?.exit!=null?fmtHM(rec.exit):'');
+  const[note,setNote]=useState(rec?.note||'');
+  useEffect(()=>{
+    setEntry(rec?.entry!=null?fmtHM(rec.entry):'');
+    setExit(rec?.exit!=null?fmtHM(rec.exit):'');
+    setNote(rec?.note||'');
+  },[dk,rec]);
+  const save=()=>{const patch={};const e=parseHM(entry);const s=parseHM(exit);patch.entry=e??null;patch.exit=s??null;patch.note=note||undefined;onUpdate(patch);onClose();};
+  return(
+    <div className="modal-bg" onClick={onClose}>
+      <div className="modal" onClick={e=>e.stopPropagation()}>
+        <div className="modal-head">
+          <h2>{DAY_FULL[date.getDay()]} {date.getDate()} de {MONTH_FULL[date.getMonth()]}<small>{date.getFullYear()} {dk===todayKey&&'· hoy'}</small></h2>
+          <button className="modal-x" onClick={onClose}>✕</button>
+        </div>
+        {rec?.holiday&&<div className="modal-section"><span className="pill pill-rest"><span className="dot"/>Feriado · {rec.holiday}</span></div>}
+        <div className="modal-stats">
+          <div className="modal-stat"><div className="l">Trabajadas</div><div className="v">{calc?fmtHrs(calc.worked,{short:true}):'—'}</div></div>
+          <div className="modal-stat"><div className="l">En oficina</div><div className="v">{calc?fmtHrs(calc.onSite,{short:true}):'—'}</div></div>
+          <div className="modal-stat"><div className="l">Tardanza</div><div className={`v${calc?.tard>0?' late':''}`}>{calc?fmtHrs(calc.tard,{short:true}):'—'}</div></div>
+          <div className="modal-stat"><div className="l">Extras del día</div><div className={`v${calc?.dailyOver>0?' over':''}`}>{calc?fmtHrs(calc.dailyOver,{short:true}):'—'}</div></div>
+        </div>
+        <div className="modal-section">
+          <h3>Marcas del día</h3>
+          <div className="time-inputs">
+            <div style={{flex:1}}><div style={{fontSize:11,color:'var(--muted)',marginBottom:4}}>Entrada</div><input className="time-input" type="time" value={entry} onChange={e=>setEntry(e.target.value)}/></div>
+            <div style={{flex:1}}><div style={{fontSize:11,color:'var(--muted)',marginBottom:4}}>Salida</div><input className="time-input" type="time" value={exit} onChange={e=>setExit(e.target.value)}/></div>
+          </div>
+          {calc&&calc.tard>0&&<div style={{marginTop:12,background:'var(--late-soft)',border:'1px solid var(--late)',borderRadius:10,padding:'10px 14px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+            <div>
+              <div style={{fontSize:11,fontWeight:600,letterSpacing:'.06em',textTransform:'uppercase',color:'var(--late)'}}>Salida ajustada por tardanza</div>
+              <div style={{fontFamily:"Geist Mono,monospace",fontSize:24,fontWeight:500,color:'var(--late)',marginTop:2}}>{fmtHM(calc.scheduledExit)}</div>
+            </div>
+            <div style={{fontSize:11,color:'var(--late)',textAlign:'right'}}>+{fmtHrs(calc.tard,{short:true})}<br/>de tardanza</div>
+          </div>}
+          {calc&&calc.tard===0&&calc.entry!=null&&<div style={{marginTop:12,background:'var(--accent-soft)',border:'1px solid var(--accent)',borderRadius:10,padding:'10px 14px'}}>
+            <div style={{fontSize:11,fontWeight:600,letterSpacing:'.06em',textTransform:'uppercase',color:'var(--accent)'}}>Salida programada</div>
+            <div style={{fontFamily:"Geist Mono,monospace",fontSize:24,fontWeight:500,color:'var(--accent)',marginTop:2}}>{fmtHM(calc.scheduledExit)}</div>
+          </div>}
+        </div>
+        <div className="modal-section">
+          <h3>Nota / justificación</h3>
+          <textarea className="note-input" value={note} onChange={e=>setNote(e.target.value)} placeholder="Tráfico, cita médica, etc."/>
+        </div>
+        <div className="modal-actions">
+          <button className="btn btn-ghost" onClick={onClear}>Borrar registro</button>
+          <button className="btn btn-primary" style={{width:'auto',padding:'10px 22px'}} onClick={save}>Guardar</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── MAIN APP ──────────────────────────────────────────────────
+function App(){
+  const[user,setUser]=useState(null);
+  const[authLoading,setAuthLoading]=useState(true);
+  const[records,setRecords]=useState({});
+  const[syncStatus,setSyncStatus]=useState('ok'); // ok | syncing | error
+  const[now,setNow]=useState(()=>new Date());
+  const[viewMonth,setViewMonth]=useState(()=>{const d=new Date();return{y:d.getFullYear(),m:d.getMonth()};});
+  const[selected,setSelected]=useState(null);
+  const[historyFilter,setHistoryFilter]=useState('week');
+  const[exportOpen,setExportOpen]=useState(false);
+  const cfg={scheduleStart:'08:00',scheduleEnd:'17:45',lunchMin:45,weeklyGoal:45,dailyGoal:9};
+  const todayKey=dateKey(now);
+  const nowMin=now.getHours()*60+now.getMinutes();
+  const todayRec=records[todayKey];
+  const todayCalc=calcDay(todayRec,cfg,nowMin);
+  const week=useMemo(()=>calcWeek(records,now,cfg,nowMin),[records,now,nowMin]);
+
+  // Auth listener
+  useEffect(()=>{
+    supabase = getSupabase();
+    if(!supabase)return;
+    supabase.auth.getSession().then(({data:{session}})=>{
+      setUser(session?.user??null);
+      setAuthLoading(false);
+    });
+    const{data:{subscription}}=supabase.auth.onAuthStateChange((_,session)=>{
+      setUser(session?.user??null);
+    });
+    return()=>subscription.unsubscribe();
+  },[]);
+
+  // Load records from Supabase when user logs in
+  useEffect(()=>{
+    if(!user||!supabase)return;
+    const load=async()=>{
+      const{data,error}=await supabase.from('asistencia').select('*').eq('user_id',user.id);
+      if(error){console.error(error);return;}
+      const map={};
+      data.forEach(row=>{
+        map[row.fecha]={
+          entry:row.entrada_min,
+          exit:row.salida_min,
+          note:row.nota||undefined,
+          holiday:row.feriado||undefined,
+        };
+      });
+      setRecords(map);
+    };
+    load();
+  },[user]);
+
+  // Clock
+  useEffect(()=>{const id=setInterval(()=>setNow(new Date()),1000);return()=>clearInterval(id);},[]);
+
+  // Save record to Supabase
+  const saveRecord=async(fecha,data)=>{
+    if(!supabase||!user)return;
+    setSyncStatus('syncing');
+    const upsertData={user_id:user.id,fecha,entrada_min:data.entry??null,salida_min:data.exit??null,nota:data.note??null,feriado:data.holiday??null};
+    const{error}=await supabase.from('asistencia').upsert(upsertData,{onConflict:'user_id,fecha'});
+    setSyncStatus(error?'error':'ok');
+    if(error)console.error('Error guardando:',error);
+  };
+
+  const deleteRecord=async(fecha)=>{
+    if(!supabase||!user)return;
+    setSyncStatus('syncing');
+    const{error}=await supabase.from('asistencia').delete().eq('user_id',user.id).eq('fecha',fecha);
+    setSyncStatus(error?'error':'ok');
+  };
+
+  const markEntry=()=>{
+    if(todayRec?.entry!=null)return;
+    const updated={...(records[todayKey]||{}),entry:nowMin};
+    setRecords(r=>({...r,[todayKey]:updated}));
+    saveRecord(todayKey,updated);
+  };
+  const markExit=()=>{
+    if(todayRec?.entry==null)return;
+    const updated={...(records[todayKey]||{}),exit:nowMin};
+    setRecords(r=>({...r,[todayKey]:updated}));
+    saveRecord(todayKey,updated);
+  };
+  const undoExit=()=>{
+    const updated={...(records[todayKey]||{}),exit:null};
+    setRecords(r=>({...r,[todayKey]:updated}));
+    saveRecord(todayKey,updated);
+  };
+  const updateRecord=(k,patch)=>{
+    const updated={...(records[k]||{}),...patch};
+    setRecords(r=>({...r,[k]:updated}));
+    saveRecord(k,updated);
+  };
+  const clearRecord=(k)=>{
+    setRecords(r=>{const{[k]:_,...rest}=r;return rest;});
+    deleteRecord(k);
+  };
+
+  const downloadFile=(filename,content,mime)=>{
+    const blob=new Blob([content],{type:mime});const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download=filename;
+    document.body.appendChild(a);a.click();setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},100);
+  };
+  const exportCSV=(scope)=>{
+    const headers=['Fecha','Día','Entrada','Salida','Horas trabajadas','Tardanza (min)','Extras día (min)','Nota'];
+    let entries=Object.entries(records).map(([k,rec])=>({k,rec,date:fromKey(k)})).sort((a,b)=>a.k.localeCompare(b.k));
+    if(scope==='month')entries=entries.filter(({date})=>date.getFullYear()===viewMonth.y&&date.getMonth()===viewMonth.m);
+    else if(scope==='week'){const ws=weekStart(now);const we=new Date(ws.getFullYear(),ws.getMonth(),ws.getDate()+7);entries=entries.filter(({date})=>date>=ws&&date<we);}
+    const rows=entries.map(({k,rec,date})=>{const calc=calcDay(rec,cfg,nowMin);return[k,DAY_FULL[date.getDay()],rec.entry!=null?fmtHM(rec.entry):'',rec.exit!=null?fmtHM(rec.exit):'',calc?fmtHrs(calc.worked,{short:true}):'',calc?calc.tard:'',calc?calc.dailyOver:'',(rec.note||'').replace(/"/g,'""')];});
+    const csv='\ufeff'+[headers,...rows].map(r=>r.map(c=>{const s=String(c??'');return/[",;\n]/.test(s)?`"${s}"`:s;}).join(';')).join('\r\n');
+    downloadFile(`asistencia-${scope}.csv`,csv,'text/csv;charset=utf-8');
+  };
+  const exportPDF=()=>{document.body.classList.add('printing');setTimeout(()=>{window.print();setTimeout(()=>document.body.classList.remove('printing'),500);},100);};
+  const handleLogout=()=>{if(supabase)supabase.auth.signOut();setRecords({});setUser(null);};
+
+  if(!isConfigured)return<ConfigScreen/>;
+  if(authLoading)return<div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',color:'var(--muted)',fontFamily:'Geist,sans-serif'}}>Cargando...</div>;
+  if(!user)return<LoginScreen onLogin={setUser}/>;
+
+  return(
+    <div className="app">
+      <Topbar now={now} user={user} syncStatus={syncStatus} exportOpen={exportOpen} setExportOpen={setExportOpen} onExportCSV={exportCSV} onExportPDF={exportPDF} onLogout={handleLogout}/>
+      <div className="grid">
+        <div style={{display:'flex',flexDirection:'column',gap:18}}>
+          <TodayCard now={now} todayRec={todayRec} todayCalc={todayCalc} cfg={cfg} nowMin={nowMin} onMarkEntry={markEntry} onMarkExit={markExit} onUndoExit={undoExit}/>
+          <WeekCard week={week} cfg={cfg}/>
+          <HistoryCard records={records} cfg={cfg} nowMin={nowMin} todayKey={todayKey} filter={historyFilter} onFilter={setHistoryFilter} anchor={now} month={viewMonth} onPick={setSelected}/>
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:18}}>
+          <MonthCalendar records={records} cfg={cfg} nowMin={nowMin} todayKey={todayKey} viewMonth={viewMonth} onSetViewMonth={setViewMonth} onPick={setSelected} selected={selected}/>
+          <MonthSummary records={records} cfg={cfg} nowMin={nowMin} todayKey={todayKey} viewMonth={viewMonth}/>
+        </div>
+      </div>
+      {selected&&(
+        <DayDetailModal dateKey={selected} rec={records[selected]} cfg={cfg} nowMin={nowMin} todayKey={todayKey} onClose={()=>setSelected(null)} onUpdate={(patch)=>updateRecord(selected,patch)} onClear={()=>{clearRecord(selected);setSelected(null);}}/>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

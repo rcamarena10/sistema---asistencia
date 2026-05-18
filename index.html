@@ -541,18 +541,16 @@ function Topbar({now,user,syncStatus,exportOpen,setExportOpen,onExportCSV,onExpo
   const s=String(now.getSeconds()).padStart(2,'0');
   const displayName=user?.user_metadata?.full_name||user?.email?.split('@')[0]||'Usuario';
   return(
-    <div style={{padding:'8px 0 20px',display:'flex',flexDirection:'column',gap:8}}>
-        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',width:'100%',gap:8}}>
-        <div className="brand"><div className="brand-dot"/>Sistema de Asistencia</div>
-        <div style={{display:'flex',alignItems:'center',gap:6}}>
-          <span className="nowclock">{h}:{m}:{s}</span>
-        <div style={{display:'flex',alignItems:'center',gap:6,background:'var(--canvas)',border:'1px solid var(--line)',borderRadius:8,padding:'4px 8px',flexShrink:0}}>
+    <div style={{padding:'8px 0 16px',display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,flexWrap:'wrap'}}>
+      <div className="brand"><div className="brand-dot"/>Sistema de Asistencia</div>
+      <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+        <div style={{display:'flex',alignItems:'center',gap:6,background:'var(--canvas)',border:'1px solid var(--line)',borderRadius:8,padding:'4px 10px',fontSize:12}}>
           <div className={`sync-dot ${syncStatus}`}/>
-          <span style={{fontSize:12,maxWidth:isMobile?80:200,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{displayName}</span>
+          <span style={{maxWidth:isMobile?80:160,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{displayName}</span>
           <button className="logout-btn" onClick={onEditSchedule}>⚙</button>
           <button className="logout-btn" onClick={onLogout}>salir</button>
         </div>
-        </div>
+        <span className="nowclock">{h}:{m}:{s}</span>
         <div className="export-wrap" style={{flexShrink:0}}>
           <button className="btn btn-ghost" style={{padding:'6px 12px',fontSize:12,whiteSpace:'nowrap'}} onClick={()=>setExportOpen(o=>!o)}>
             Exportar ↓

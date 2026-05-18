@@ -722,7 +722,7 @@ function WeekCard({week,cfg}){
           meta: <strong style={{color:'var(--ink)'}}>{weekGoalHrs}h</strong>
         </div>
       </div>
-      <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:10,height:window.innerWidth<700?90:70,padding:'0 4px',width:'100%'}}>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(7,40px)',gap:10,height:window.innerWidth<700?90:80,padding:0,justifyContent:'center',width:'100%'}}>
         {week.days.map(({date,key,calc})=>{
           const isToday=dateKey(new Date())===key; const isFuture=date>new Date()&&!isToday;
           const goalDailyMin=parseHM(cfg.scheduleEnd)-parseHM(cfg.scheduleStart)-cfg.lunchMin; const barH=isFuture?0:calc?Math.min(100,(calc.worked/goalDailyMin)*100):0;

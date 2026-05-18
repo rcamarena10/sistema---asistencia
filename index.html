@@ -875,7 +875,7 @@ function HistoryCard({records,cfg,nowMin,todayKey,filter,onFilter,anchor,month,o
             const calc=calcDay(rec,cfg,nowMin);
             return(
               <tr key={k} onClick={()=>onPick(k)}>
-                <td><div className="hist-date"><span className="dnum">{String(date.getDate()).padStart(2,'0')}</span><span className="dname">{DAY_SHORT[date.getDay()]} {MONTH_FULL[date.getMonth()].slice(0,3)}</span>{k===todayKey&&<span className="pill pill-ok" style={{padding:'2px 8px',fontSize:10}}>Hoy</span>}</div></td>
+                <td><div className="hist-date"><span className="dnum">{String(date.getDate()).padStart(2,'0')}</span><span className="dname">{DAY_SHORT[date.getDay()]} {MONTH_FULL[date.getMonth()].slice(0,3)}</span>{k===todayKey&&<span style={{background:'var(--accent-soft)',color:'var(--accent)',borderRadius:4,fontSize:9,padding:'1px 5px',fontWeight:600,marginLeft:4,verticalAlign:'middle',whiteSpace:'nowrap'}}>hoy</span>}</div></td>
                 {rec.holiday?<td colSpan={5}><span className="pill pill-rest"><span className="dot"/>{rec.holiday}</span></td>:(
                   <>
                     <td className="hist-time">{rec.entry!=null?fmtHM(rec.entry):'—'}</td>

@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <title>Sistema de Asistencia</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSIxNCIgZmlsbD0iIzE4NUZBNSIvPgogIDxjaXJjbGUgY3g9IjI4IiBjeT0iMjYiIHI9IjEwIiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIuNSIvPgogIDxsaW5lIHgxPSIyOCIgeTE9IjI2IiB4Mj0iMjgiIHkyPSIxOSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KICA8bGluZSB4MT0iMjgiIHkxPSIyNiIgeDI9IjMzIiB5Mj0iMjkiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgPGNpcmNsZSBjeD0iMjgiIGN5PSIyNiIgcj0iMiIgZmlsbD0id2hpdGUiLz4KICA8bGluZSB4MT0iMTIiIHkxPSI0NCIgeDI9IjUyIiB5Mj0iNDQiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2Utb3BhY2l0eT0iMC40Ii8+CiAgPHJlY3QgeD0iMTYiIHk9IjM2IiB3aWR0aD0iOCIgaGVpZ2h0PSI4IiByeD0iMSIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC45Ii8+CiAgPHJlY3QgeD0iMjgiIHk9IjMyIiB3aWR0aD0iOCIgaGVpZ2h0PSIxMiIgcng9IjEiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuNyIvPgogIDxyZWN0IHg9IjQwIiB5PSIzOCIgd2lkdGg9IjgiIGhlaWdodD0iNiIgcng9IjEiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuNSIvPgo8L3N2Zz4=">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -194,7 +195,7 @@ html,body{background:var(--bg);color:var(--ink);font-family:'Geist',ui-sans-seri
 // ── SUPABASE CONFIG ──────────────────────────────────────────
 // Reemplaza estos valores con los de tu proyecto en supabase.com
 const SUPABASE_URL = 'https://fkrnkwvvssskbsjqmvex.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrcm5rd3Z2c3Nza2JzanFtdmV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NzY0NjYsImV4cCI6MjA5NDM1MjQ2Nn0.9jNoL--rtJc0nahXm60t3evi0g6K9pLfZ8EljDE20VM';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrcm5rd3Z2c3Nza2JzanFtdmV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NzY0NjYsImV4cCI6MjA5NDM1MjQ2Nn0.9jNoL--rtJc0nahXm60t3evi0g6K9pLfZ8EljDE20VMY';
 // ─────────────────────────────────────────────────────────────
 
 const isConfigured = SUPABASE_URL !== 'TU_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'TU_SUPABASE_ANON_KEY';

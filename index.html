@@ -227,23 +227,8 @@
   .export-menu button{appearance:none;border:0;background:transparent;display:flex;align-items:center;justify-content:space-between;padding:9px 10px;border-radius:8px;font-family:inherit;font-size:13px;color:var(--ink);cursor:pointer;text-align:left;width:100%}
   .export-menu button:hover{background:var(--line-2)}
   .export-menu .ext{font-family:'Geist Mono',monospace;font-size:11px;color:var(--muted)}
-    *{box-sizing:border-box!important}
-    .app{padding:12px!important}
-    .modal{width:calc(100vw - 32px)!important;max-width:calc(100vw - 32px)!important}
-    .config-box{width:calc(100vw - 32px)!important;max-width:calc(100vw - 32px)!important}
-    table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%}
-    .topbar{flex-wrap:wrap;gap:6px;padding:4px 0 14px}
     .topright{gap:6px;flex-wrap:wrap;font-size:11px;width:100%}
-    .nowclock{font-size:11px}
-    .export-wrap button{padding:6px 10px!important;font-size:11px!important}
-    .user-badge{padding:4px 8px;font-size:11px;gap:6px}
-    .brand{font-size:12px}
-    .grid{grid-template-columns:1fr!important;gap:12px}
-    .today{grid-template-columns:1fr!important;gap:12px}
-    .today-time{font-size:52px!important;line-height:1}
     .today-right{flex-direction:row;align-items:center;gap:14px}
-    .ring-wrap{max-width:140px!important;min-width:140px}
-    .ring-val{font-size:22px}
     .week-meter{height:90px;gap:4px;overflow:hidden;width:100%}
     .day-bar-wrap{max-width:28px}
     .kvs{grid-template-columns:1fr 1fr;gap:8px 14px}
@@ -276,12 +261,6 @@
     .seg button{padding:5px 10px;font-size:11px}
   }
     .app{padding:12px!important;max-width:100vw!important}
-    .topbar{flex-wrap:wrap;gap:8px;padding:6px 0 16px}
-    .topright{gap:8px;flex-wrap:wrap;justify-content:flex-start}
-    .grid{grid-template-columns:1fr!important}
-    .today{grid-template-columns:1fr!important;min-height:auto!important}
-    .today-time{font-size:52px!important}
-    .ring-wrap{max-width:160px!important;margin:auto}
     .week-meter{height:90px}
     .day-bar-wrap{max-width:30px}
     .kvs{gap:10px 16px}
@@ -293,11 +272,12 @@
     .cal-hours{font-size:7px}
     .hist-table{font-size:11px}
     .hist-table th,.hist-table td{padding:8px 5px}
-    .nowclock{font-size:11px}
     .user-badge{font-size:11px;padding:4px 8px}
     .brand{font-size:13px}
-    .export-wrap button{padding:6px 10px!important;font-size:11px!important}
   }
+  
+  
+  
   
   
   @media(max-width:1100px){
@@ -307,14 +287,12 @@
   @media(max-width:768px){
     html,body{overflow-x:hidden}
     .app{padding:12px!important}
-    .topbar{flex-direction:column!important;align-items:flex-start!important;gap:8px!important;padding:6px 0 14px!important}
-    .topright{gap:8px!important;flex-wrap:wrap!important;width:100%!important}
-    .grid{grid-template-columns:1fr!important}
+    .topbar{flex-direction:column!important;align-items:flex-start!important;gap:6px!important;padding:6px 0 12px!important}
+    .topright{gap:6px!important;flex-wrap:wrap!important;width:100%!important}
     .today{grid-template-columns:1fr!important;min-height:auto!important}
     .today-time{font-size:50px!important}
     .ring-wrap{max-width:160px!important;margin:auto!important}
     .week-meter{height:90px!important}
-    .day-bar-wrap{max-width:30px!important}
     .modal{width:calc(100vw - 24px)!important;max-width:none!important;padding:16px!important}
     .week-prog{min-width:40px!important}
     .week-summary{flex-wrap:wrap!important;gap:8px!important}
@@ -324,6 +302,7 @@
     .hist-table th,.hist-table td{padding:7px 5px!important}
     .nowclock{font-size:11px!important}
     .user-badge{font-size:11px!important;padding:4px 8px!important}
+    .export-wrap button{padding:6px 10px!important;font-size:11px!important}
   }
   @media print{
     @page{size:A4;margin:14mm}
@@ -334,7 +313,6 @@
     .card{break-inside:avoid;box-shadow:none;border:1px solid #ccc!important;margin-bottom:12px}
     .grid{grid-template-columns:1fr!important;gap:12px!important}
     .today{grid-template-columns:1fr!important}
-    .today-right .btn{display:none!important}
     .ring-wrap{display:none!important}
     button{display:none!important}
   }</style>

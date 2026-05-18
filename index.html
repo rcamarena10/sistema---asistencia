@@ -383,7 +383,7 @@ function calcWeek(records,anchor,cfg,nowMin){
 
 function calcMonth(records,year,monthIdx,cfg,nowMin,todayKey){
   let totalWorked=0,totalTard=0,totalOver=0,daysWorked=0;
-  const goalDaily=cfg.dailyGoal*60; // 9h en minutos
+  const goalDaily=parseHM(cfg.scheduleEnd)-parseHM(cfg.scheduleStart)-cfg.lunchMin; // minutos reales del horario
   // Meta total del mes = días laborables del mes * 9h
   const totalWorkdays=workdaysInMonth(year,monthIdx);
   const goalMonth=totalWorkdays*goalDaily;
@@ -701,8 +701,8 @@ function WeekCard({week,cfg}){
   const pct=Math.min(100,(week.totalWorked/goal)*100);
   const over=week.totalWorked>goal;
   const wdCount=workdaysInWeek(week.start);
-  const weekGoalHrs=wdCount*cfg.dailyGoal;
-  const weekGoalMin=weekGoalHrs*60;
+  const weekGoalHrs=Math.round(wdCount*(parseHM(cfg.scheduleEnd)-parseHM(cfg.scheduleStart)-cfg.lunchMin)/60*100)/100;
+  const weekGoalMin=wdCount*(parseHM(cfg.scheduleEnd)-parseHM(cfg.scheduleStart)-cfg.lunchMin);
   const pctReal=Math.min(100,(week.totalWorked/weekGoalMin)*100);
   return(
     <div className="card card-pad-tight">

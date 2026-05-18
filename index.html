@@ -824,7 +824,7 @@ function MonthSummary({records,cfg,nowMin,todayKey,viewMonth}){
           <div className="stat-l">Meta mensual · {mc.totalWorkdays} días laborables</div>
           <div style={{display:'flex',alignItems:'baseline',gap:8,marginTop:4,flexWrap:'wrap'}}>
             <div className="stat-v accent">{fmtHrs(mc.totalWorked,{short:true})}</div>
-            <div style={{fontSize:12,color:'var(--muted)',fontFamily:'Geist Mono,monospace'}}>/ {fmtHrs(mc.goalToDate,{short:true})}</div>
+            <div style={{fontSize:12,color:'var(--muted)',fontFamily:'Geist Mono,monospace'}}>/ <strong style={{color:'var(--ink)'}}>{fmtHrs(mc.goalToDate,{short:true})}</strong> esperadas a la fecha</div>
             {mc.totalWorked>=mc.goalToDate&&mc.goalToDate>0&&<span className="pill pill-ok" style={{fontSize:10,padding:'2px 8px'}}>✓ Al día</span>}
           </div>
           <div style={{fontSize:11,color:'var(--muted)',marginTop:2}}>Meta total del mes: {fmtHrs(mc.goalMonth,{short:true})}</div>

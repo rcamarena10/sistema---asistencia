@@ -37,11 +37,11 @@ html,body{background:var(--bg);color:var(--ink);font-family:'Geist',ui-sans-seri
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .grid{display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
 @media(min-width:900px){.grid{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:18px}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;overflow:hidden}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;overflow:hidden;max-width:100%}
 @media(min-width:700px){.card{border-radius:18px;padding:22px 24px}}
 .card-pad-tight{padding:12px 14px}
 @media(min-width:700px){.card-pad-tight{padding:18px 20px}}
-.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:6px;flex-wrap:wrap}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:6px;flex-wrap:wrap;min-width:0;overflow:hidden}
 .card-title{font-size:10px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;color:var(--muted)}
 .card-sub{font-size:10px;color:var(--muted)}
 .pill{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:999px;font-size:10px;font-weight:500;border:1px solid var(--line)}
@@ -148,7 +148,7 @@ html,body{background:var(--bg);color:var(--ink);font-family:'Geist',ui-sans-seri
 .note-input{width:100%;background:var(--canvas);border:1px solid var(--line-2);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:12px;color:var(--ink);resize:vertical;min-height:52px}
 .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;padding-top:12px;border-top:1px solid var(--line-2)}
 .seg{display:inline-flex;background:var(--canvas);border-radius:7px;padding:2px;gap:1px}
-.seg button{appearance:none;border:0;background:transparent;padding:4px 9px;border-radius:6px;font-size:11px;color:var(--muted);cursor:pointer;font-family:inherit;font-weight:500}
+.seg button{appearance:none;border:0;background:transparent;padding:4px 7px;border-radius:6px;font-size:11px;color:var(--muted);cursor:pointer;font-family:inherit;font-weight:500;white-space:nowrap}
 .seg button.active{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.05)}
 .status-block{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
 .export-wrap{position:relative}
@@ -847,7 +847,7 @@ function HistoryCard({records,cfg,nowMin,todayKey,filter,onFilter,anchor,month,o
           <button className={filter==='all'?'active':''} onClick={()=>onFilter('all')}>Todo</button>
         </div>
       </div>
-      <table className="hist-table">
+      <div style={{overflowX:"auto",width:"100%"}}><table className="hist-table">
         <thead><tr><th>Fecha</th><th>Entrada</th><th>Salida</th><th className="right">Trabajadas</th><th className="right">Tardanza</th><th className="right">Extras</th><th>Nota</th></tr></thead>
         <tbody>
           {entries.length===0&&<tr><td colSpan={7} style={{color:'var(--muted)',padding:'24px 12px',textAlign:'center'}}>Sin registros</td></tr>}
@@ -870,7 +870,7 @@ function HistoryCard({records,cfg,nowMin,todayKey,filter,onFilter,anchor,month,o
             );
           })}
         </tbody>
-      </table>
+      </table></div>
     </div>
   );
 }

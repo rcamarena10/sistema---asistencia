@@ -1077,9 +1077,9 @@ function VacacionesModal({records, onClose, onSave, userId}){
   const save = async () => {
     if(!puedeGuardar) return;
     setLoading(true);
-    const d1 = new Date(desde); const d2 = new Date(hasta);
+    const d1 = new Date(desde + 'T00:00:00'); const d2 = new Date(hasta + 'T00:00:00');
     const upserts = [];
-    for(let d=new Date(d1); d<=d2; d.setDate(d.getDate()+1)){
+    for(let d=new Date(d1); dateKey(d)<=dateKey(d2); d.setDate(d.getDate()+1)){
       const k = dateKey(new Date(d));
       // Skip today and days that already have entry/exit records
       const today = dateKey(new Date());

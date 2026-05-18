@@ -338,8 +338,16 @@ function calcMonth(records,year,monthIdx,cfg,nowMin,todayKey){
   // Meta a la fecha = días laborables hasta hoy * 9h
   const workdaysHoy=workdaysToDate(year,monthIdx,todayKey);
   const goalToDate=workdaysHoy*goalDaily;
+  let vacacionDays=0;
   for(const[k,rec]of Object.entries(records)){
     const d=fromKey(k); if(d.getFullYear()!==year||d.getMonth()!==monthIdx)continue;
+    // Vacation days count as full workday toward goal
+    if(rec?.vacacion&&isWorkday(d)){
+      totalWorked+=goalDaily;
+      vacacionDays++;
+      daysWorked++;
+      continue;
+    }
     const calc=rec?calcDay(rec,cfg,nowMin):null;
     if(calc){
       totalWorked+=calc.worked;
@@ -348,7 +356,7 @@ function calcMonth(records,year,monthIdx,cfg,nowMin,todayKey){
       totalOver+=Math.max(0,calc.worked-goalDaily);
     }
   }
-  return{totalWorked,totalTard,totalOver,daysWorked,goalToDate,goalMonth,totalWorkdays,workdaysHoy};
+  return{totalWorked,totalTard,totalOver,daysWorked,goalToDate,goalMonth,totalWorkdays,workdaysHoy,vacacionDays};
 }
 
 // ── CONFIG SCREEN (when not yet configured) ──────────────────

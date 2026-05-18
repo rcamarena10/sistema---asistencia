@@ -1080,9 +1080,12 @@ function VacacionesModal({records, onClose, onSave, userId}){
     const d1 = new Date(desde); const d2 = new Date(hasta);
     const upserts = [];
     for(let d=new Date(d1); d<=d2; d.setDate(d.getDate()+1)){
+      const k = dateKey(new Date(d));
+      // Skip days that already have entry/exit records
+      if(records[k]?.entry!=null || records[k]?.exit!=null) continue;
       upserts.push({
         user_id: userId,
-        fecha: dateKey(new Date(d)),
+        fecha: k,
         entrada_min: null,
         salida_min: null,
         nota: 'Vacaciones',
@@ -1090,8 +1093,12 @@ function VacacionesModal({records, onClose, onSave, userId}){
         vacacion: true,
       });
     }
-    const {error} = await supabase.from('asistencia').upsert(upserts, {onConflict:'user_id,fecha'});
-    if(!error) onSave(upserts);
+    if(upserts.length > 0){
+      const {error} = await supabase.from('asistencia').upsert(upserts, {onConflict:'user_id,fecha'});
+      if(!error) onSave(upserts);
+    } else {
+      onSave([]);
+    }
     setLoading(false);
     onClose();
   };
@@ -1291,7 +1298,10 @@ function App(){
   const handleVacaciones=(upserts)=>{
     const newRecords={...records};
     upserts.forEach(u=>{
-      newRecords[u.fecha]={entry:null,exit:null,note:'Vacaciones',vacacion:true};
+      // Only set vacation if day has no existing entry/exit record
+      if(!newRecords[u.fecha]?.entry && !newRecords[u.fecha]?.exit){
+        newRecords[u.fecha]={entry:null,exit:null,note:'Vacaciones',vacacion:true};
+      }
     });
     setRecords(newRecords);
   };

@@ -957,12 +957,16 @@ function App(){
   const[selected,setSelected]=useState(null);
   const[historyFilter,setHistoryFilter]=useState('week');
   const[exportOpen,setExportOpen]=useState(false);
+  const _start = userSchedule?.scheduleStart||'08:00';
+  const _end = userSchedule?.scheduleEnd||'17:45';
+  const _lunch = userSchedule?.lunchMin||45;
+  const _dailyGoalMin = parseHM(_end) - parseHM(_start) - _lunch;
   const cfg={
-    scheduleStart: userSchedule?.scheduleStart||'08:00',
-    scheduleEnd: userSchedule?.scheduleEnd||'17:45',
-    lunchMin: userSchedule?.lunchMin||45,
-    weeklyGoal:45,
-    dailyGoal:9
+    scheduleStart: _start,
+    scheduleEnd: _end,
+    lunchMin: _lunch,
+    weeklyGoal: Math.round((_dailyGoalMin/60)*5*10)/10,
+    dailyGoal: _dailyGoalMin/60
   };
   const todayKey=dateKey(now);
   const nowMin=now.getHours()*60+now.getMinutes();

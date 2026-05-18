@@ -461,7 +461,6 @@ function calcMonth(records,year,monthIdx,cfg,nowMin,todayKey){
       totalWorked+=calc.worked;
       totalTard+=calc.tard;
       if(calc.worked>0)daysWorked++;
-      // Extras por día: lo que trabajó sobre la meta diaria de 9h
       totalOver+=Math.max(0,calc.worked-goalDaily);
     }
   }

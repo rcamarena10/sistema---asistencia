@@ -436,11 +436,11 @@ const TURNOS = [
   {id:'C', label:'Personalizado', start:'', end:'', lunch:45, desc:'Ingresa tu horario'},
 ];
 
-function ScheduleSetup({user, onSave}){
-  const [selected, setSelected] = useState('A');
-  const [customStart, setCustomStart] = useState('08:00');
-  const [customEnd, setCustomEnd] = useState('17:00');
-  const [lunch, setLunch] = useState(45);
+function ScheduleSetup({user, onSave, currentSchedule}){
+  const [selected, setSelected] = useState(currentSchedule?.turnoId||'A');
+  const [customStart, setCustomStart] = useState(currentSchedule?.scheduleStart||'08:00');
+  const [customEnd, setCustomEnd] = useState(currentSchedule?.scheduleEnd||'17:00');
+  const [lunch, setLunch] = useState(currentSchedule?.lunchMin||45);
   const [loading, setLoading] = useState(false);
 
   const save = async () => {
@@ -990,7 +990,7 @@ function App(){
     const loadSchedule=async()=>{
       const{data,error}=await supabase.from('empleados').select('*').eq('user_id',user.id).single();
       if(error||!data){setShowScheduleSetup(true);}
-      else{setUserSchedule({scheduleStart:data.schedule_start,scheduleEnd:data.schedule_end,lunchMin:data.lunch_min});}
+      else{setUserSchedule({scheduleStart:data.schedule_start,scheduleEnd:data.schedule_end,lunchMin:data.lunch_min,turnoId:data.turno_id});}
     };
     loadSchedule();
   },[user]);
@@ -1082,7 +1082,7 @@ function App(){
   if(!isConfigured)return<ConfigScreen/>;
   if(authLoading)return<div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',color:'var(--muted)',fontFamily:'Geist,sans-serif'}}>Cargando...</div>;
   if(!user)return<LoginScreen onLogin={setUser}/>;
-  if(showScheduleSetup)return<ScheduleSetup user={user} onSave={(s)=>{setUserSchedule({scheduleStart:s.schedule_start,scheduleEnd:s.schedule_end,lunchMin:s.lunch_min});setShowScheduleSetup(false);}}/>;
+  if(showScheduleSetup)return<ScheduleSetup user={user} currentSchedule={{...userSchedule,turnoId:userSchedule?.turnoId}} onSave={(s)=>{setUserSchedule({scheduleStart:s.schedule_start,scheduleEnd:s.schedule_end,lunchMin:s.lunch_min,turnoId:s.turno_id});setShowScheduleSetup(false);}}/>;
   if(!userSchedule)return<div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',color:'var(--muted)',fontFamily:'Geist,sans-serif'}}>Cargando horario...</div>;
 
   return(

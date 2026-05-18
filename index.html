@@ -903,9 +903,11 @@ function HistoryCard({records,cfg,nowMin,todayKey,filter,onFilter,anchor,month,o
 
 // ── DAY DETAIL MODAL ──────────────────────────────────────────
 function DayDetailModal({dateKey:dk,rec,cfg,nowMin,todayKey,onClose,onUpdate,onClear}){
-  const date=fromKey(dk); const calc=rec?calcDay(rec,cfg,nowMin):null;
+  const date=fromKey(dk);
+  const calc=rec?calcDay(rec,cfg,nowMin):null;
   const isFeriado=isHolidayPeru(date);
   const isFuturo=dk>todayKey;
+  const isVacacion=rec?.vacacion===true;
   const[entry,setEntry]=useState(rec?.entry!=null?fmtHM(rec.entry):'');
   const[exit,setExit]=useState(rec?.exit!=null?fmtHM(rec.exit):'');
   const[note,setNote]=useState(rec?.note||'');
@@ -915,7 +917,7 @@ function DayDetailModal({dateKey:dk,rec,cfg,nowMin,todayKey,onClose,onUpdate,onC
     setNote(rec?.note||'');
   },[dk,rec]);
   const save=()=>{
-    if(rec?.vacacion){
+    if(isVacacion){
       if(!window.confirm('Este día está marcado como vacación. ¿Deseas registrar asistencia y cancelar la vacación?')) return;
     }
     const patch={};const e=parseHM(entry);const s=parseHM(exit);
@@ -929,18 +931,7 @@ function DayDetailModal({dateKey:dk,rec,cfg,nowMin,todayKey,onClose,onUpdate,onC
           <h2>{DAY_FULL[date.getDay()]} {date.getDate()} de {MONTH_FULL[date.getMonth()]}<small>{date.getFullYear()} {dk===todayKey&&'· hoy'}</small></h2>
           <button className="modal-x" onClick={onClose}>✕</button>
         </div>
-        {isFuturo&&!rec?.vacacion&&(
-          <div style={{background:'var(--canvas)',border:'1px solid var(--line)',borderRadius:10,padding:'10px 14px',marginBottom:12,display:'flex',alignItems:'center',gap:8}}>
-            <span style={{fontSize:16}}>📅</span>
-            <div style={{fontSize:12,color:'var(--muted)'}}>No puedes registrar asistencia en días futuros.</div>
-          </div>
-        )}
-        {rec?.vacacion&&!isFeriado&&(
-          <div style={{background:'#E6F1FB',border:'1px solid #85B7EB',borderRadius:10,padding:'10px 14px',marginBottom:12,display:'flex',alignItems:'center',gap:8}}>
-            <span style={{fontSize:18}}>🏖</span>
-            <div style={{fontSize:12,color:'#0C447C'}}>Este día está marcado como vacación. Si guardas, se cancelará la vacación.</div>
-          </div>
-        )}
+
         {isFeriado&&(
           <div style={{background:'var(--rest-soft)',border:'1px solid var(--rest)',borderRadius:10,padding:'12px 14px',marginBottom:14,display:'flex',alignItems:'center',gap:10}}>
             <span style={{fontSize:20}}>🇵🇪</span>
@@ -950,6 +941,31 @@ function DayDetailModal({dateKey:dk,rec,cfg,nowMin,todayKey,onClose,onUpdate,onC
             </div>
           </div>
         )}
+
+        {isFuturo&&isVacacion&&(
+          <div style={{background:'#E6F1FB',border:'1px solid #85B7EB',borderRadius:10,padding:'12px 14px',marginBottom:14,display:'flex',alignItems:'center',justifyContent:'space-between',gap:10}}>
+            <div style={{display:'flex',alignItems:'center',gap:8}}>
+              <span style={{fontSize:20}}>🏖</span>
+              <div style={{fontSize:12,color:'#0C447C'}}>Este día está registrado como vacación.</div>
+            </div>
+            <button className="btn btn-ghost" style={{padding:'6px 12px',fontSize:12,flexShrink:0}} onClick={()=>{onClear();onClose();}}>Cancelar vacación</button>
+          </div>
+        )}
+
+        {isFuturo&&!isVacacion&&!isFeriado&&(
+          <div style={{background:'var(--canvas)',border:'1px solid var(--line)',borderRadius:10,padding:'10px 14px',marginBottom:12,display:'flex',alignItems:'center',gap:8}}>
+            <span style={{fontSize:16}}>📅</span>
+            <div style={{fontSize:12,color:'var(--muted)'}}>No puedes registrar asistencia en días futuros.</div>
+          </div>
+        )}
+
+        {isVacacion&&!isFeriado&&!isFuturo&&(
+          <div style={{background:'#E6F1FB',border:'1px solid #85B7EB',borderRadius:10,padding:'10px 14px',marginBottom:12,display:'flex',alignItems:'center',gap:8}}>
+            <span style={{fontSize:16}}>🏖</span>
+            <div style={{fontSize:12,color:'#0C447C'}}>Este día está marcado como vacación. Si guardas, se cancelará.</div>
+          </div>
+        )}
+
         {!isFeriado&&!isFuturo&&(
           <div>
             <div className="modal-stats">
@@ -986,7 +1002,14 @@ function DayDetailModal({dateKey:dk,rec,cfg,nowMin,todayKey,onClose,onUpdate,onC
             </div>
           </div>
         )}
-        {isFeriado&&(
+
+        {(isFeriado||(isFuturo&&!isVacacion))&&(
+          <div className="modal-actions">
+            <button className="btn btn-ghost" onClick={onClose}>Cerrar</button>
+          </div>
+        )}
+
+        {isFuturo&&isVacacion&&(
           <div className="modal-actions">
             <button className="btn btn-ghost" onClick={onClose}>Cerrar</button>
           </div>
@@ -995,7 +1018,6 @@ function DayDetailModal({dateKey:dk,rec,cfg,nowMin,todayKey,onClose,onUpdate,onC
     </div>
   );
 }
-
 
 
 // ── SALIDA ANTICIPADA MODAL ──────────────────────────────────

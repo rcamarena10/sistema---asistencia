@@ -869,7 +869,7 @@ function HistoryCard({records,cfg,nowMin,todayKey,filter,onFilter,anchor,month,o
           <button className={filter==='all'?'active':''} onClick={()=>onFilter('all')}>Todo</button>
         </div>
       </div>
-      <div style={{overflowX:"auto",width:"100%"}}><table className="hist-table">
+      <div style={{overflowX:"auto",width:"100%",WebkitOverflowScrolling:"touch"}}><table className="hist-table" style={{minWidth:480}}>
         <thead><tr><th>Fecha</th><th>Entrada</th><th>Salida</th><th className="right">Trabajadas</th><th className="right">Tardanza</th><th className="right">Extras</th><th>Nota</th></tr></thead>
         <tbody>
           {entries.length===0&&<tr><td colSpan={7} style={{color:'var(--muted)',padding:'24px 12px',textAlign:'center'}}>Sin registros</td></tr>}

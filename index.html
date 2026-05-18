@@ -92,13 +92,13 @@
   .pill-rest{color:var(--rest);background:var(--rest-soft);border-color:transparent}
   .pill-ghost{color:var(--muted);background:transparent}
   .today{display:grid;grid-template-columns:1.05fr 1fr;gap:28px;min-height:360px}
-  .today-left{display:flex;flex-direction:column;gap:14px}
+  .today-left{display:flex;flex-direction:column;gap:14px;min-width:0;overflow:hidden}
   .today-date{font-size:13px;color:var(--muted);text-transform:capitalize}
   .today-hero{display:flex;align-items:baseline;gap:14px;margin-top:-2px}
   .today-time{font-family:'Geist Mono',monospace;font-size:74px;font-weight:500;
     letter-spacing:-0.04em;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
   .today-secs{font-family:'Geist Mono',monospace;font-size:18px;color:var(--muted);font-variant-numeric:tabular-nums}
-  .kvs{display:grid;grid-template-columns:1fr 1fr;gap:14px 24px;margin-top:8px}
+  .kvs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 24px;margin-top:8px}
   .kv-l{font-size:11px;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase}
   .kv-v{font-family:'Geist Mono',monospace;font-size:20px;font-weight:500;color:var(--ink);
     font-variant-numeric:tabular-nums;letter-spacing:-0.01em;margin-top:2px}

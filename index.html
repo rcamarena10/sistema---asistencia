@@ -693,7 +693,7 @@ function WeekCard({week,cfg}){
   const weekGoalMin=wdCount*(parseHM(cfg.scheduleEnd)-parseHM(cfg.scheduleStart)-cfg.lunchMin);
   const pctReal=Math.min(100,(week.totalWorked/weekGoalMin)*100);
   return(
-    <div className="card card-pad-tight" style={{padding:window.innerWidth<700?"8px":"18px 20px"}}>
+    <div style={{background:'var(--card)',border:'1px solid var(--line)',borderRadius:14,padding:window.innerWidth<700?'8px 6px':'18px 20px',overflow:'hidden'}}>
       <div className="card-head">
         <div className="card-title">Esta semana</div>
         <div style={{fontSize:11,color:'var(--muted)',fontFamily:'Geist Mono,monospace',whiteSpace:'nowrap'}}>

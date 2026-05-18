@@ -30,10 +30,10 @@ html,body{background:var(--bg);color:var(--ink);font-family:'Geist',ui-sans-seri
 .app{min-height:100vh;padding:16px;max-width:1440px;margin:0 auto}
 
 /* ─── TOPBAR ─── */
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 0 16px;flex-wrap:wrap;gap:8px}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 0 16px;gap:8px}
 .brand{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;letter-spacing:-0.01em}
 .brand-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px color-mix(in oklch,var(--accent) 18%,transparent);flex-shrink:0}
-.topright{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.topright{display:flex;align-items:center;gap:6px}
 .nowclock{font-family:'Geist Mono',monospace;font-size:12px;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
 .user-badge{display:flex;align-items:center;gap:6px;background:var(--canvas);border:1px solid var(--line);border-radius:8px;padding:4px 10px;font-size:12px}
 .user-badge .logout-btn{appearance:none;border:0;background:transparent;cursor:pointer;font-size:11px;color:var(--muted);padding:0;font-family:inherit}
@@ -116,8 +116,8 @@ html,body{background:var(--bg);color:var(--ink);font-family:'Geist',ui-sans-seri
 .day-bar-wrap.today{outline:2px solid var(--ink);outline-offset:2px}
 .day-bar{position:absolute;left:0;right:0;bottom:0;background:var(--accent);border-radius:6px;transition:height .4s ease}
 .day-bar.future{background:repeating-linear-gradient(45deg,var(--line-2) 0 3px,transparent 3px 6px);border:1px dashed var(--line)}
-.day-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;text-align:center}
-.day-num{font-family:'Geist Mono',monospace;font-size:9px;color:var(--ink-2);font-variant-numeric:tabular-nums;text-align:center}
+.day-label{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:0.02em;text-align:center}
+.day-num{font-family:'Geist Mono',monospace;font-size:8px;color:var(--ink-2);font-variant-numeric:tabular-nums;text-align:center}
 .week-summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:12px;border-top:1px solid var(--line-2);flex-wrap:wrap}
 .week-total{display:flex;align-items:baseline;gap:8px;flex-shrink:0}
 .week-total .big{font-family:'Geist Mono',monospace;font-size:30px;font-weight:500;letter-spacing:-0.03em;color:var(--ink)}

@@ -12,8 +12,8 @@
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{background:var(--bg);color:var(--ink);font-family:'Geist',ui-sans-serif,system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+*{box-sizing:border-box;margin:0;padding:0;min-width:0}
+html,body{background:var(--bg);color:var(--ink);font-family:'Geist',ui-sans-serif,system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden;max-width:100vw;width:100%}
 :root{
   --bg:#F4F4F2;--canvas:#F8F8F6;--card:#FFFFFF;--ink:#0F0F0E;--ink-2:#3A3A37;
   --muted:#8C8A85;--line:rgba(15,15,14,.10);--line-2:rgba(15,15,14,.05);
@@ -22,7 +22,7 @@ html,body{background:var(--bg);color:var(--ink);font-family:'Geist',ui-sans-seri
   --over:oklch(62% 0.13 70);--over-soft:oklch(95% 0.04 70);
   --rest:oklch(60% 0.03 250);--rest-soft:oklch(95% 0.012 250);
 }
-.app{min-height:100vh;padding:8px;max-width:1440px;margin:0 auto}
+.app{min-height:100vh;padding:8px;max-width:100%;margin:0 auto;overflow-x:hidden}
 @media(min-width:700px){.app{padding:24px 32px 64px}}
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:0 0 12px;gap:8px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px}
@@ -51,13 +51,13 @@ html,body{background:var(--bg);color:var(--ink);font-family:'Geist',ui-sans-seri
 .pill-over{color:var(--over);background:var(--over-soft);border-color:transparent}
 .pill-rest{color:var(--rest);background:var(--rest-soft);border-color:transparent}
 .pill-ghost{color:var(--muted);background:transparent}
-.today-left{display:flex;flex-direction:column;gap:10px;min-width:0}
+.today-left{display:flex;flex-direction:column;gap:10px;min-width:0;overflow:hidden;max-width:100%}
 .today-date{font-size:11px;color:var(--muted);text-transform:capitalize}
 .today-hero{display:flex;align-items:baseline;gap:8px}
 .today-time{font-family:'Geist Mono',monospace;font-size:48px;font-weight:500;letter-spacing:-0.04em;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
 @media(min-width:700px){.today-time{font-size:68px}}
 .today-secs{font-family:'Geist Mono',monospace;font-size:14px;color:var(--muted)}
-.kvs{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}
+.kvs{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;max-width:100%;overflow:hidden}
 .kv-l{font-size:9px;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase}
 .kv-v{font-family:'Geist Mono',monospace;font-size:16px;font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums;margin-top:1px}
 .kv-sub{font-size:9px;color:var(--muted);margin-top:1px}
@@ -68,7 +68,7 @@ html,body{background:var(--bg);color:var(--ink);font-family:'Geist',ui-sans-seri
 .btn-danger{background:var(--late);color:#fff}
 .btn-ghost{background:transparent;color:var(--ink-2);border:1px solid var(--line)}
 .btn-ghost:hover{background:var(--line-2)}
-.timeline{margin-top:8px}
+.timeline{margin-top:8px;max-width:100%;overflow:hidden}
 .timeline-track{position:relative;height:5px;background:var(--line-2);border-radius:99px;overflow:visible}
 .timeline-seg{position:absolute;top:0;bottom:0;border-radius:99px}
 .timeline-seg.work{background:var(--accent)}
@@ -82,7 +82,7 @@ html,body{background:var(--bg);color:var(--ink);font-family:'Geist',ui-sans-seri
 .week-total .big{font-family:'Geist Mono',monospace;font-size:26px;font-weight:500;letter-spacing:-0.03em;color:var(--ink)}
 @media(min-width:700px){.week-total .big{font-size:34px}}
 .week-total .small{color:var(--muted);font-family:'Geist Mono',monospace;font-size:13px}
-.week-prog{height:5px;background:var(--line-2);border-radius:99px;overflow:hidden;flex:1;min-width:30px;align-self:center}
+.week-prog{height:5px;background:var(--line-2);border-radius:99px;overflow:hidden;flex:1;min-width:0;align-self:center}
 .week-prog-fill{height:100%;background:var(--accent);border-radius:99px}
 .week-prog-over{height:100%;background:var(--over)}
 .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px}

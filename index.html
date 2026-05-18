@@ -1275,7 +1275,11 @@ function App(){
 
   const markEntry=()=>{
     if(todayRec?.entry!=null)return;
-    const updated={...(records[todayKey]||{}),entry:nowMin};
+    if(todayRec?.vacacion){
+      if(!window.confirm('Este día está marcado como vacación. ¿Deseas registrar asistencia y cancelar la vacación?')) return;
+      deleteRecord(todayKey);
+    }
+    const updated={entry:nowMin,vacacion:false};
     setRecords(r=>({...r,[todayKey]:updated}));
     saveRecord(todayKey,updated);
   };

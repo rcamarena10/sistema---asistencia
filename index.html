@@ -533,6 +533,103 @@ function ConfigScreen(){
   );
 }
 
+
+// ── SCHEDULE SETUP SCREEN ────────────────────────────────────
+const TURNOS = [
+  {id:'A', label:'Turno A', start:'08:00', end:'17:45', lunch:45, desc:'8:00 am — 5:45 pm'},
+  {id:'B', label:'Turno B', start:'08:00', end:'16:45', lunch:45, desc:'8:00 am — 4:45 pm'},
+  {id:'C', label:'Personalizado', start:'', end:'', lunch:45, desc:'Ingresa tu horario'},
+];
+
+function ScheduleSetup({user, onSave}){
+  const [selected, setSelected] = useState('A');
+  const [customStart, setCustomStart] = useState('08:00');
+  const [customEnd, setCustomEnd] = useState('17:00');
+  const [lunch, setLunch] = useState(45);
+  const [loading, setLoading] = useState(false);
+
+  const save = async () => {
+    setLoading(true);
+    const turno = TURNOS.find(t=>t.id===selected);
+    const schedule = {
+      user_id: user.id,
+      schedule_start: selected==='C' ? customStart : turno.start,
+      schedule_end: selected==='C' ? customEnd : turno.end,
+      lunch_min: lunch,
+      turno_id: selected,
+    };
+    const {error} = await supabase.from('empleados').upsert(schedule, {onConflict:'user_id'});
+    if(!error) onSave(schedule);
+    setLoading(false);
+  };
+
+  const turno = TURNOS.find(t=>t.id===selected);
+
+  return(
+    <div className="login-screen">
+      <div className="login-box" style={{maxWidth:440}}>
+        <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:20}}>
+          <div className="brand-dot"/>
+          <span style={{fontWeight:600,fontSize:15}}>Configurar horario</span>
+        </div>
+        <h2 style={{marginBottom:4}}>¿Cuál es tu turno?</h2>
+        <p style={{marginBottom:20}}>Elige tu horario de trabajo. Puedes cambiarlo después desde tu perfil.</p>
+        <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:20}}>
+          {TURNOS.map(t=>(
+            <div key={t.id} onClick={()=>setSelected(t.id)}
+              style={{border:`1.5px solid ${selected===t.id?'var(--accent)':'var(--line-2)'}`,
+                borderRadius:12,padding:'12px 16px',cursor:'pointer',
+                background:selected===t.id?'var(--accent-soft)':'var(--canvas)',
+                display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+              <div>
+                <div style={{fontWeight:600,fontSize:14,color:'var(--ink)'}}>{t.label}</div>
+                <div style={{fontSize:12,color:'var(--muted)',marginTop:2}}>{t.desc}</div>
+              </div>
+              <div style={{width:18,height:18,borderRadius:'50%',
+                border:`2px solid ${selected===t.id?'var(--accent)':'var(--line)'}`,
+                background:selected===t.id?'var(--accent)':'transparent',
+                display:'flex',alignItems:'center',justifyContent:'center'}}>
+                {selected===t.id&&<div style={{width:8,height:8,borderRadius:'50%',background:'#fff'}}/>}
+              </div>
+            </div>
+          ))}
+        </div>
+        {selected==='C'&&(
+          <div style={{marginBottom:16}}>
+            <div style={{display:'flex',gap:10,marginBottom:10}}>
+              <div style={{flex:1}}>
+                <label>Hora entrada</label>
+                <input type="time" className="time-input" value={customStart} onChange={e=>setCustomStart(e.target.value)} style={{width:'100%',marginTop:6}}/>
+              </div>
+              <div style={{flex:1}}>
+                <label>Hora salida</label>
+                <input type="time" className="time-input" value={customEnd} onChange={e=>setCustomEnd(e.target.value)} style={{width:'100%',marginTop:6}}/>
+              </div>
+            </div>
+          </div>
+        )}
+        <div style={{marginBottom:20}}>
+          <label style={{display:'block',fontSize:11,fontWeight:600,letterSpacing:'.08em',textTransform:'uppercase',color:'var(--muted)',marginBottom:6}}>Refrigerio (minutos)</label>
+          <div style={{display:'flex',gap:8}}>
+            {[30,45,60].map(m=>(
+              <div key={m} onClick={()=>setLunch(m)}
+                style={{flex:1,textAlign:'center',padding:'10px',borderRadius:10,cursor:'pointer',
+                  border:`1.5px solid ${lunch===m?'var(--accent)':'var(--line-2)'}`,
+                  background:lunch===m?'var(--accent-soft)':'var(--canvas)',
+                  fontWeight:600,fontSize:14,color:lunch===m?'var(--accent)':'var(--ink)'}}>
+                {m} min
+              </div>
+            ))}
+          </div>
+        </div>
+        <button className="login-btn" onClick={save} disabled={loading}>
+          {loading?'Guardando...':'Confirmar horario'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── LOGIN SCREEN ─────────────────────────────────────────────
 function LoginScreen({onLogin}){
   const [mode,setMode]=useState('login'); // 'login' | 'register'
@@ -594,7 +691,7 @@ function LoginScreen({onLogin}){
 }
 
 // ── TOPBAR ────────────────────────────────────────────────────
-function Topbar({now,user,syncStatus,exportOpen,setExportOpen,onExportCSV,onExportPDF,onLogout}){
+function Topbar({now,user,syncStatus,exportOpen,setExportOpen,onExportCSV,onExportPDF,onLogout,onEditSchedule}){
   const h=String(now.getHours()).padStart(2,'0');
   const m=String(now.getMinutes()).padStart(2,'0');
   const s=String(now.getSeconds()).padStart(2,'0');
@@ -609,6 +706,7 @@ function Topbar({now,user,syncStatus,exportOpen,setExportOpen,onExportCSV,onExpo
         <div style={{display:'flex',alignItems:'center',gap:6,background:'var(--canvas)',border:'1px solid var(--line)',borderRadius:10,padding:'4px 10px',flex:1,minWidth:0,overflow:'hidden'}}>
           <div className={`sync-dot ${syncStatus}`}/>
           <span style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',fontSize:12,flex:1}}>{displayName}</span>
+          <button className="logout-btn" onClick={onEditSchedule} style={{flexShrink:0,marginRight:4}}>⚙</button>
           <button className="logout-btn" onClick={onLogout} style={{flexShrink:0}}>salir</button>
         </div>
         <div className="export-wrap" style={{flexShrink:0}}>
@@ -957,12 +1055,20 @@ function App(){
   const[authLoading,setAuthLoading]=useState(true);
   const[records,setRecords]=useState({});
   const[syncStatus,setSyncStatus]=useState('ok'); // ok | syncing | error
+  const[userSchedule,setUserSchedule]=useState(null);
+  const[showScheduleSetup,setShowScheduleSetup]=useState(false);
   const[now,setNow]=useState(()=>new Date());
   const[viewMonth,setViewMonth]=useState(()=>{const d=new Date();return{y:d.getFullYear(),m:d.getMonth()};});
   const[selected,setSelected]=useState(null);
   const[historyFilter,setHistoryFilter]=useState('week');
   const[exportOpen,setExportOpen]=useState(false);
-  const cfg={scheduleStart:'08:00',scheduleEnd:'17:45',lunchMin:45,weeklyGoal:45,dailyGoal:9};
+  const cfg={
+    scheduleStart: userSchedule?.scheduleStart||'08:00',
+    scheduleEnd: userSchedule?.scheduleEnd||'17:45',
+    lunchMin: userSchedule?.lunchMin||45,
+    weeklyGoal:45,
+    dailyGoal:9
+  };
   const todayKey=dateKey(now);
   const nowMin=now.getHours()*60+now.getMinutes();
   const todayRec=records[todayKey];
@@ -982,6 +1088,17 @@ function App(){
     });
     return()=>subscription.unsubscribe();
   },[]);
+
+  // Load schedule when user logs in
+  useEffect(()=>{
+    if(!user||!supabase)return;
+    const loadSchedule=async()=>{
+      const{data,error}=await supabase.from('empleados').select('*').eq('user_id',user.id).single();
+      if(error||!data){setShowScheduleSetup(true);}
+      else{setUserSchedule({scheduleStart:data.schedule_start,scheduleEnd:data.schedule_end,lunchMin:data.lunch_min});}
+    };
+    loadSchedule();
+  },[user]);
 
   // Load records from Supabase when user logs in
   useEffect(()=>{
@@ -1070,10 +1187,12 @@ function App(){
   if(!isConfigured)return<ConfigScreen/>;
   if(authLoading)return<div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',color:'var(--muted)',fontFamily:'Geist,sans-serif'}}>Cargando...</div>;
   if(!user)return<LoginScreen onLogin={setUser}/>;
+  if(showScheduleSetup)return<ScheduleSetup user={user} onSave={(s)=>{setUserSchedule({scheduleStart:s.schedule_start,scheduleEnd:s.schedule_end,lunchMin:s.lunch_min});setShowScheduleSetup(false);}}/>;
+  if(!userSchedule)return<div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',color:'var(--muted)',fontFamily:'Geist,sans-serif'}}>Cargando horario...</div>;
 
   return(
     <div className="app">
-      <Topbar now={now} user={user} syncStatus={syncStatus} exportOpen={exportOpen} setExportOpen={setExportOpen} onExportCSV={exportCSV} onExportPDF={exportPDF} onLogout={handleLogout}/>
+      <Topbar now={now} user={user} syncStatus={syncStatus} exportOpen={exportOpen} setExportOpen={setExportOpen} onExportCSV={exportCSV} onExportPDF={exportPDF} onLogout={handleLogout} onEditSchedule={()=>setShowScheduleSetup(true)}/>
       <div className="grid">
         <div style={{display:'flex',flexDirection:'column',gap:18}}>
           <TodayCard now={now} todayRec={todayRec} todayCalc={todayCalc} cfg={cfg} nowMin={nowMin} onMarkEntry={markEntry} onMarkExit={markExit} onUndoExit={undoExit}/>

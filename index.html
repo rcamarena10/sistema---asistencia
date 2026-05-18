@@ -572,7 +572,7 @@ function Topbar({now,user,syncStatus,exportOpen,setExportOpen,onExportCSV,onExpo
 }
 
 // ── TODAY CARD ────────────────────────────────────────────────
-function TodayCard({now,todayRec,todayCalc,cfg,nowMin,onMarkEntry,onMarkExit,onUndoExit}){
+function TodayCard({now,todayRec,todayCalc,cfg,nowMin,onMarkEntry,onMarkExit,onUndoExit,onSalidaAnticipada,onVacaciones}){
   const mobile = window.innerWidth < 700;
   const h=String(now.getHours()).padStart(2,'0');
   const m=String(now.getMinutes()).padStart(2,'0');
@@ -594,9 +594,10 @@ function TodayCard({now,todayRec,todayCalc,cfg,nowMin,onMarkEntry,onMarkExit,onU
         <div className="today-secs">{s}</div>
       </div>
       <div className="status-block">
-        {!hasEntry&&<span className="pill pill-ghost"><span className="dot"/>Sin registrar</span>}
+        {todayRec?.vacacion&&<span className="pill pill-rest"><span className="dot"/>Vacaciones</span>}
+        {!hasEntry&&!todayRec?.vacacion&&<span className="pill pill-ghost"><span className="dot"/>Sin registrar</span>}
         {hasEntry&&!hasExit&&<span className="pill pill-ok"><span className="dot"/>En curso</span>}
-        {hasExit&&<span className="pill pill-rest"><span className="dot"/>Completado</span>}
+        {hasExit&&!todayRec?.vacacion&&<span className="pill pill-rest"><span className="dot"/>Completado</span>}
         {todayCalc?.tard>0&&<span className="pill pill-late"><span className="dot"/>+{fmtHrs(todayCalc.tard,{short:true})} tardanza</span>}
         {todayCalc?.dailyOver>0&&<span className="pill pill-over"><span className="dot"/>+{fmtHrs(todayCalc.dailyOver,{short:true})} extras</span>}
       </div>
@@ -668,7 +669,9 @@ function TodayCard({now,todayRec,todayCalc,cfg,nowMin,onMarkEntry,onMarkExit,onU
             <div style={{flex:1,display:'flex',flexDirection:'column',gap:6}}>
               {!hasEntry&&<button className="btn btn-primary" style={{width:'100%'}} onClick={onMarkEntry}>▶ Marcar entrada</button>}
               {hasEntry&&!hasExit&&<button className="btn btn-danger" style={{width:'100%'}} onClick={onMarkExit}>■ Marcar salida</button>}
+              {hasEntry&&!hasExit&&<button className="btn btn-ghost" style={{width:'100%'}} onClick={onSalidaAnticipada}>↙ Salida anticipada</button>}
               {hasExit&&<button className="btn btn-ghost" style={{width:'100%'}} onClick={onUndoExit}>↩ Deshacer salida</button>}
+              {!hasEntry&&<button className="btn btn-ghost" style={{width:'100%'}} onClick={onVacaciones}>🏖 Vacaciones</button>}
             </div>
           </div>
         </div>
@@ -694,7 +697,9 @@ function TodayCard({now,todayRec,todayCalc,cfg,nowMin,onMarkEntry,onMarkExit,onU
             <div style={{display:'flex',flexDirection:'column',gap:8,width:'100%'}}>
               {!hasEntry&&<button className="btn btn-primary" style={{width:'100%'}} onClick={onMarkEntry}>▶ Marcar entrada</button>}
               {hasEntry&&!hasExit&&<button className="btn btn-danger" style={{width:'100%'}} onClick={onMarkExit}>■ Marcar salida</button>}
+              {hasEntry&&!hasExit&&<button className="btn btn-ghost" style={{width:'100%'}} onClick={onSalidaAnticipada}>↙ Salida anticipada</button>}
               {hasExit&&<button className="btn btn-ghost" style={{width:'100%'}} onClick={onUndoExit}>↩ Deshacer salida</button>}
+              {!hasEntry&&<button className="btn btn-ghost" style={{width:'100%'}} onClick={onVacaciones}>🏖 Vacaciones</button>}
             </div>
           </div>
         </div>
@@ -799,9 +804,10 @@ function MonthCalendar({records,cfg,nowMin,todayKey,viewMonth,onSetViewMonth,onP
               <div>
                 <div className="cal-marks">
                   {rec?.holiday&&<span className="cal-mark rest"/>}
-                  {calc&&calc.tard>0&&<span className="cal-mark late"/>}
-                  {calc&&calc.dailyOver>0&&<span className="cal-mark over"/>}
-                  {calc&&calc.tard===0&&<span className="cal-mark ok"/>}
+                  {rec?.vacacion&&<span className="cal-mark" style={{background:'#378ADD'}}/>}
+                  {calc&&!rec?.vacacion&&calc.tard>0&&<span className="cal-mark late"/>}
+                  {calc&&!rec?.vacacion&&calc.dailyOver>0&&<span className="cal-mark over"/>}
+                  {calc&&!rec?.vacacion&&calc.tard===0&&<span className="cal-mark ok"/>}
                 </div>
                 {calc&&<div className="cal-hours">{fmtHrs(calc.worked,{short:true})}</div>}
               </div>
@@ -971,6 +977,194 @@ function DayDetailModal({dateKey:dk,rec,cfg,nowMin,todayKey,onClose,onUpdate,onC
 }
 
 
+
+// ── SALIDA ANTICIPADA MODAL ──────────────────────────────────
+function SalidaAnticipadaModal({cfg, nowMin, onClose, onSave}){
+  const [salidaHora, setSalidaHora] = React.useState(fmtHM(nowMin));
+  const [motivo, setMotivo] = React.useState('');
+  const [detalle, setDetalle] = React.useState('');
+  const MOTIVOS = ['Médico','Familiar','Trámite','Capacitación','Otro'];
+  
+  const salidaNormalMin = parseHM(cfg.scheduleEnd);
+  const salidaMin = parseHM(salidaHora);
+  const faltaMin = salidaNormalMin - (salidaMin||0);
+  
+  const save = () => {
+    if(!salidaHora||!motivo) return;
+    onSave({exit: salidaMin, earlyExit: true, earlyExitMotivo: motivo, earlyExitDetalle: detalle, note: `Salida anticipada: ${motivo}${detalle?' - '+detalle:''}`});
+    onClose();
+  };
+  
+  return(
+    <div className="modal-bg" onClick={onClose}>
+      <div className="modal" onClick={e=>e.stopPropagation()}>
+        <div className="modal-head">
+          <h2>Salida anticipada<small>Registra tu salida antes de hora</small></h2>
+          <button className="modal-x" onClick={onClose}>✕</button>
+        </div>
+        <div style={{display:'flex',gap:8,marginBottom:12}}>
+          <div style={{flex:1,background:'var(--canvas)',borderRadius:10,padding:'8px 12px'}}>
+            <div style={{fontSize:10,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'.06em'}}>Hora normal</div>
+            <div style={{fontFamily:'Geist Mono,monospace',fontSize:20,fontWeight:500,color:'var(--ink)',marginTop:2}}>{cfg.scheduleEnd}</div>
+          </div>
+          <div style={{flex:1}}>
+            <div style={{fontSize:10,color:'var(--muted)',marginBottom:4,textTransform:'uppercase',letterSpacing:'.06em'}}>Salgo a las</div>
+            <input className="time-input" type="time" value={salidaHora} onChange={e=>setSalidaHora(e.target.value)}/>
+          </div>
+        </div>
+        {faltaMin>0&&<div style={{background:'var(--over-soft)',border:'1px solid var(--over)',borderRadius:10,padding:'8px 12px',marginBottom:12,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <span style={{fontSize:12,color:'var(--over)'}}>Tiempo que faltará</span>
+          <span style={{fontFamily:'Geist Mono,monospace',fontSize:16,fontWeight:500,color:'var(--over)'}}>-{fmtHrs(faltaMin,{short:true})}</span>
+        </div>}
+        {faltaMin<=0&&salidaHora&&<div style={{background:'var(--accent-soft)',border:'1px solid var(--accent)',borderRadius:10,padding:'8px 12px',marginBottom:12}}>
+          <span style={{fontSize:12,color:'var(--accent)'}}>La hora ingresada es igual o posterior a tu hora de salida</span>
+        </div>}
+        <div style={{marginBottom:12}}>
+          <div style={{fontSize:10,color:'var(--muted)',marginBottom:6,textTransform:'uppercase',letterSpacing:'.06em'}}>Motivo *</div>
+          <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+            {MOTIVOS.map(m=>(
+              <span key={m} onClick={()=>setMotivo(m)} style={{background:motivo===m?'var(--accent-soft)':'var(--canvas)',color:motivo===m?'var(--accent)':'var(--muted)',border:`1px solid ${motivo===m?'var(--accent)':'var(--line)'}`,borderRadius:99,padding:'4px 12px',fontSize:12,cursor:'pointer'}}>{m}</span>
+            ))}
+          </div>
+        </div>
+        <div style={{marginBottom:16}}>
+          <div style={{fontSize:10,color:'var(--muted)',marginBottom:4,textTransform:'uppercase',letterSpacing:'.06em'}}>Detalle (opcional)</div>
+          <textarea className="note-input" value={detalle} onChange={e=>setDetalle(e.target.value)} placeholder="Cita médica a las 16:00..."/>
+        </div>
+        <div className="modal-actions">
+          <button className="btn btn-ghost" onClick={onClose}>Cancelar</button>
+          <button className="btn btn-primary" style={{width:'auto',padding:'10px 22px'}} onClick={save} disabled={!motivo||faltaMin<=0}>Registrar</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── VACACIONES MODAL ──────────────────────────────────────────
+function VacacionesModal({records, onClose, onSave, userId}){
+  const [desde, setDesde] = React.useState('');
+  const [hasta, setHasta] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+  const DIAS_ANUALES = 30;
+  
+  // Count used vacation days from records
+  const diasUsados = Object.values(records).filter(r=>r.vacacion).length;
+  const diasDisponibles = DIAS_ANUALES - diasUsados;
+  
+  // Calculate days in range (calendar days)
+  const calcDiasRango = () => {
+    if(!desde||!hasta) return 0;
+    const d1 = new Date(desde); const d2 = new Date(hasta);
+    if(d2<d1) return 0;
+    return Math.round((d2-d1)/(1000*60*60*24))+1;
+  };
+  
+  // Calculate workdays in range (to subtract from monthly goal)
+  const calcDiasLaborablesRango = () => {
+    if(!desde||!hasta) return 0;
+    const d1 = new Date(desde); const d2 = new Date(hasta);
+    let count=0;
+    for(let d=new Date(d1); d<=d2; d.setDate(d.getDate()+1)){
+      if(isWorkday(new Date(d))) count++;
+    }
+    return count;
+  };
+  
+  const diasRango = calcDiasRango();
+  const diasLaborables = calcDiasLaborablesRango();
+  const puedeGuardar = desde && hasta && diasRango>0 && diasRango<=diasDisponibles;
+  
+  const save = async () => {
+    if(!puedeGuardar) return;
+    setLoading(true);
+    const d1 = new Date(desde); const d2 = new Date(hasta);
+    const upserts = [];
+    for(let d=new Date(d1); d<=d2; d.setDate(d.getDate()+1)){
+      upserts.push({
+        user_id: userId,
+        fecha: dateKey(new Date(d)),
+        entrada_min: null,
+        salida_min: null,
+        nota: 'Vacaciones',
+        feriado: null,
+        vacacion: true,
+      });
+    }
+    const {error} = await supabase.from('asistencia').upsert(upserts, {onConflict:'user_id,fecha'});
+    if(!error) onSave(upserts);
+    setLoading(false);
+    onClose();
+  };
+  
+  return(
+    <div className="modal-bg" onClick={onClose}>
+      <div className="modal" onClick={e=>e.stopPropagation()}>
+        <div className="modal-head">
+          <h2>Vacaciones<small>Registra tus días de descanso</small></h2>
+          <button className="modal-x" onClick={onClose}>✕</button>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8,marginBottom:16}}>
+          <div style={{background:'var(--accent-soft)',borderRadius:10,padding:'10px 12px',textAlign:'center'}}>
+            <div style={{fontSize:10,color:'var(--accent)',textTransform:'uppercase',letterSpacing:'.06em'}}>Disponibles</div>
+            <div style={{fontFamily:'Geist Mono,monospace',fontSize:24,fontWeight:500,color:'var(--accent)',marginTop:2}}>{diasDisponibles}</div>
+            <div style={{fontSize:10,color:'var(--accent)'}}>días</div>
+          </div>
+          <div style={{background:'var(--canvas)',borderRadius:10,padding:'10px 12px',textAlign:'center'}}>
+            <div style={{fontSize:10,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'.06em'}}>Usados</div>
+            <div style={{fontFamily:'Geist Mono,monospace',fontSize:24,fontWeight:500,color:'var(--ink)',marginTop:2}}>{diasUsados}</div>
+            <div style={{fontSize:10,color:'var(--muted)'}}>días</div>
+          </div>
+          <div style={{background:'var(--canvas)',borderRadius:10,padding:'10px 12px',textAlign:'center'}}>
+            <div style={{fontSize:10,color:'var(--muted)',textTransform:'uppercase',letterSpacing:'.06em'}}>Total año</div>
+            <div style={{fontFamily:'Geist Mono,monospace',fontSize:24,fontWeight:500,color:'var(--ink)',marginTop:2}}>{DIAS_ANUALES}</div>
+            <div style={{fontSize:10,color:'var(--muted)'}}>días</div>
+          </div>
+        </div>
+        <div style={{marginBottom:12}}>
+          <div style={{fontSize:10,color:'var(--muted)',marginBottom:6,textTransform:'uppercase',letterSpacing:'.06em'}}>Período de vacaciones</div>
+          <div style={{display:'flex',gap:8}}>
+            <div style={{flex:1}}>
+              <div style={{fontSize:10,color:'var(--muted)',marginBottom:3}}>Desde</div>
+              <input className="time-input" type="date" value={desde} onChange={e=>setDesde(e.target.value)} style={{fontSize:13}}/>
+            </div>
+            <div style={{flex:1}}>
+              <div style={{fontSize:10,color:'var(--muted)',marginBottom:3}}>Hasta</div>
+              <input className="time-input" type="date" value={hasta} onChange={e=>setHasta(e.target.value)} style={{fontSize:13}}/>
+            </div>
+          </div>
+        </div>
+        {diasRango>0&&(
+          <div style={{background:'var(--canvas)',borderRadius:10,padding:'10px 14px',marginBottom:12}}>
+            <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
+              <span style={{fontSize:12,color:'var(--muted)'}}>Días de vacaciones (calendario)</span>
+              <span style={{fontFamily:'Geist Mono,monospace',fontSize:13,fontWeight:500,color:'var(--ink)'}}>{diasRango} días</span>
+            </div>
+            <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
+              <span style={{fontSize:12,color:'var(--muted)'}}>Días hábiles incluidos</span>
+              <span style={{fontFamily:'Geist Mono,monospace',fontSize:13,color:'var(--muted)'}}>{diasLaborables} días</span>
+            </div>
+            <div style={{height:'0.5px',background:'var(--line-2)',margin:'8px 0'}}>
+            </div>
+            <div style={{display:'flex',justifyContent:'space-between'}}>
+              <span style={{fontSize:12,color:'var(--muted)'}}>Días restantes después</span>
+              <span style={{fontFamily:'Geist Mono,monospace',fontSize:13,fontWeight:500,color:diasDisponibles-diasRango>=0?'var(--accent)':'var(--late)'}}>{diasDisponibles-diasRango} días</span>
+            </div>
+          </div>
+        )}
+        {diasRango>diasDisponibles&&<div style={{background:'var(--late-soft)',border:'1px solid var(--late)',borderRadius:10,padding:'8px 12px',marginBottom:12,fontSize:12,color:'var(--late)'}}>
+          No tienes suficientes días disponibles ({diasDisponibles} días restantes)
+        </div>}
+        <div className="modal-actions">
+          <button className="btn btn-ghost" onClick={onClose}>Cancelar</button>
+          <button className="btn btn-primary" style={{width:'auto',padding:'10px 22px'}} onClick={save} disabled={!puedeGuardar||loading}>
+            {loading?'Guardando...':'Registrar vacaciones'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── MAIN APP ──────────────────────────────────────────────────
 function App(){
   const[user,setUser]=useState(null);
@@ -979,6 +1173,8 @@ function App(){
   const[syncStatus,setSyncStatus]=useState('ok'); // ok | syncing | error
   const[userSchedule,setUserSchedule]=useState(null);
   const[showScheduleSetup,setShowScheduleSetup]=useState(false);
+  const[showSalidaAnticipada,setShowSalidaAnticipada]=useState(false);
+  const[showVacaciones,setShowVacaciones]=useState(false);
   const[now,setNow]=useState(()=>new Date());
   const[viewMonth,setViewMonth]=useState(()=>{const d=new Date();return{y:d.getFullYear(),m:d.getMonth()};});
   const[selected,setSelected]=useState(null);
@@ -1039,6 +1235,8 @@ function App(){
           exit:row.salida_min,
           note:row.nota||undefined,
           holiday:row.feriado||undefined,
+          vacacion:row.vacacion||false,
+          earlyExit:row.early_exit||false,
         };
       });
       setRecords(map);
@@ -1053,7 +1251,7 @@ function App(){
   const saveRecord=async(fecha,data)=>{
     if(!supabase||!user)return;
     setSyncStatus('syncing');
-    const upsertData={user_id:user.id,fecha,entrada_min:data.entry??null,salida_min:data.exit??null,nota:data.note??null,feriado:data.holiday??null};
+    const upsertData={user_id:user.id,fecha,entrada_min:data.entry??null,salida_min:data.exit??null,nota:data.note??null,feriado:data.holiday??null,vacacion:data.vacacion??false,early_exit:data.earlyExit??false};
     const{error}=await supabase.from('asistencia').upsert(upsertData,{onConflict:'user_id,fecha'});
     setSyncStatus(error?'error':'ok');
     if(error)console.error('Error guardando:',error);
@@ -1082,6 +1280,20 @@ function App(){
     const updated={...(records[todayKey]||{}),exit:null};
     setRecords(r=>({...r,[todayKey]:updated}));
     saveRecord(todayKey,updated);
+  };
+  
+  const handleSalidaAnticipada=(data)=>{
+    const updated={...(records[todayKey]||{}),...data};
+    setRecords(r=>({...r,[todayKey]:updated}));
+    saveRecord(todayKey,updated);
+  };
+  
+  const handleVacaciones=(upserts)=>{
+    const newRecords={...records};
+    upserts.forEach(u=>{
+      newRecords[u.fecha]={entry:null,exit:null,note:'Vacaciones',vacacion:true};
+    });
+    setRecords(newRecords);
   };
   const updateRecord=(k,patch)=>{
     const updated={...(records[k]||{}),...patch};
@@ -1121,7 +1333,7 @@ function App(){
       <Topbar now={now} user={user} syncStatus={syncStatus} exportOpen={exportOpen} setExportOpen={setExportOpen} onExportCSV={exportCSV} onExportPDF={exportPDF} onLogout={handleLogout} onEditSchedule={()=>setShowScheduleSetup(true)}/>
       <div className="grid">
         <div style={{display:'flex',flexDirection:'column',gap:18}}>
-          <TodayCard now={now} todayRec={todayRec} todayCalc={todayCalc} cfg={cfg} nowMin={nowMin} onMarkEntry={markEntry} onMarkExit={markExit} onUndoExit={undoExit}/>
+          <TodayCard now={now} todayRec={todayRec} todayCalc={todayCalc} cfg={cfg} nowMin={nowMin} onMarkEntry={markEntry} onMarkExit={markExit} onUndoExit={undoExit} onSalidaAnticipada={()=>setShowSalidaAnticipada(true)} onVacaciones={()=>setShowVacaciones(true)}/>
           <WeekCard week={week} cfg={cfg}/>
           <HistoryCard records={records} cfg={cfg} nowMin={nowMin} todayKey={todayKey} filter={historyFilter} onFilter={setHistoryFilter} anchor={now} month={viewMonth} onPick={setSelected}/>
         </div>
@@ -1132,6 +1344,12 @@ function App(){
       </div>
       {selected&&(
         <DayDetailModal dateKey={selected} rec={records[selected]} cfg={cfg} nowMin={nowMin} todayKey={todayKey} onClose={()=>setSelected(null)} onUpdate={(patch)=>updateRecord(selected,patch)} onClear={()=>{clearRecord(selected);setSelected(null);}}/>
+      )}
+      {showSalidaAnticipada&&(
+        <SalidaAnticipadaModal cfg={cfg} nowMin={nowMin} onClose={()=>setShowSalidaAnticipada(false)} onSave={handleSalidaAnticipada}/>
+      )}
+      {showVacaciones&&(
+        <VacacionesModal records={records} onClose={()=>setShowVacaciones(false)} onSave={handleVacaciones} userId={user?.id}/>
       )}
     </div>
   );

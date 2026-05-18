@@ -167,21 +167,21 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:'
 .hist-date .dname{color:var(--muted);font-size:12px;text-transform:capitalize}
 .hist-time{font-family:'Geist Mono',monospace;font-size:13px;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
 .modal-bg{position:fixed;inset:0;background:rgba(20,18,14,.4);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:1000;animation:fadeIn .15s ease}
-.modal{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:28px;width:520px;max-width:calc(100vw - 40px);box-shadow:0 30px 80px rgba(0,0,0,.25);animation:popIn .2s ease}
+.modal{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;width:480px;max-width:calc(100vw - 40px);max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:popIn .2s ease}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes popIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
-.modal-head{display:flex;align-items:start;justify-content:space-between;margin-bottom:18px}
-.modal h2{margin:0;font-size:22px;font-weight:500;letter-spacing:-0.02em;text-transform:capitalize}
+.modal-head{display:flex;align-items:start;justify-content:space-between;margin-bottom:14px}
+.modal h2{margin:0;font-size:18px;font-weight:500;letter-spacing:-0.02em;text-transform:capitalize}
 .modal h2 small{display:block;font-size:13px;color:var(--muted);font-weight:400;letter-spacing:0;text-transform:none;margin-top:2px}
 .modal-x{appearance:none;border:0;background:var(--line-2);width:32px;height:32px;border-radius:10px;cursor:pointer;color:var(--ink-2);font-size:16px}
 .modal-x:hover{background:var(--line)}
-.modal-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
-.modal-stat{background:var(--canvas);border-radius:12px;padding:12px 14px}
+.modal-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.modal-stat{background:var(--canvas);border-radius:10px;padding:8px 12px}
 .modal-stat .l{font-size:10px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase}
-.modal-stat .v{font-family:'Geist Mono',monospace;font-size:18px;color:var(--ink);margin-top:4px}
+.modal-stat .v{font-family:'Geist Mono',monospace;font-size:16px;color:var(--ink);margin-top:2px}
 .modal-stat .v.late{color:var(--late)}
 .modal-stat .v.over{color:var(--over)}
-.modal-section{margin-bottom:16px}
+.modal-section{margin-bottom:12px}
 .modal-section h3{font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin:0 0 8px 0}
 .time-inputs{display:flex;gap:10px}
 .time-input{flex:1;background:var(--canvas);border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;font-family:'Geist Mono',monospace;font-size:16px;color:var(--ink);width:100%}

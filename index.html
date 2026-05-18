@@ -671,7 +671,7 @@ function TodayCard({now,todayRec,todayCalc,cfg,nowMin,onMarkEntry,onMarkExit,onU
               {hasEntry&&!hasExit&&<button className="btn btn-danger" style={{width:'100%'}} onClick={onMarkExit}>■ Marcar salida</button>}
               {hasEntry&&!hasExit&&<button className="btn btn-ghost" style={{width:'100%'}} onClick={onSalidaAnticipada}>↙ Salida anticipada</button>}
               {hasExit&&<button className="btn btn-ghost" style={{width:'100%'}} onClick={onUndoExit}>↩ Deshacer salida</button>}
-              {!hasEntry&&<button className="btn btn-ghost" style={{width:'100%'}} onClick={onVacaciones}>🏖 Vacaciones</button>}
+              <button className="btn btn-ghost" style={{width:'100%'}} onClick={onVacaciones}>🏖 Vacaciones</button>
             </div>
           </div>
         </div>
@@ -699,7 +699,7 @@ function TodayCard({now,todayRec,todayCalc,cfg,nowMin,onMarkEntry,onMarkExit,onU
               {hasEntry&&!hasExit&&<button className="btn btn-danger" style={{width:'100%'}} onClick={onMarkExit}>■ Marcar salida</button>}
               {hasEntry&&!hasExit&&<button className="btn btn-ghost" style={{width:'100%'}} onClick={onSalidaAnticipada}>↙ Salida anticipada</button>}
               {hasExit&&<button className="btn btn-ghost" style={{width:'100%'}} onClick={onUndoExit}>↩ Deshacer salida</button>}
-              {!hasEntry&&<button className="btn btn-ghost" style={{width:'100%'}} onClick={onVacaciones}>🏖 Vacaciones</button>}
+              <button className="btn btn-ghost" style={{width:'100%'}} onClick={onVacaciones}>🏖 Vacaciones</button>
             </div>
           </div>
         </div>

@@ -196,7 +196,7 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:'
 .seg button.active{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.05)}
 .status-block{display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap}
 .export-wrap{position:relative}
-.export-menu{position:fixed;top:auto;bottom:0;left:0;right:0;min-width:100%;z-index:1000;background:var(--card);border:1px solid var(--line);border-radius:20px 20px 0 0;padding:16px;box-shadow:0 -10px 40px rgba(0,0,0,.15);display:flex;flex-direction:column;gap:2px;animation:popIn .12s ease}
+.export-menu{position:absolute;top:calc(100% + 6px);right:0;min-width:260px;z-index:500;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px;box-shadow:0 14px 40px rgba(0,0,0,.10);display:flex;flex-direction:column;gap:2px;animation:popIn .12s ease}
 .export-menu .export-section{font-size:10px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;color:var(--muted);padding:8px 10px 4px}
 .export-menu button{appearance:none;border:0;background:transparent;display:flex;align-items:center;justify-content:space-between;padding:9px 10px;border-radius:8px;font-family:inherit;font-size:13px;color:var(--ink);cursor:pointer;text-align:left;width:100%}
 .export-menu button:hover{background:var(--line-2)}
@@ -224,6 +224,7 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:'
   .cal-day{font-size:10px}
   .hist-table{font-size:11px}
   .hist-table th,.hist-table td{padding:7px 5px}
+  .export-menu{position:absolute!important;top:calc(100% + 6px)!important;right:0!important;left:auto!important;bottom:auto!important;min-width:220px!important;border-radius:12px!important;padding:6px!important}
   .nowclock{font-size:11px}
   .user-badge{font-size:11px;padding:4px 8px}
   .export-wrap button{padding:6px 10px;font-size:11px}

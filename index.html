@@ -585,7 +585,7 @@ function TodayCard({now,todayRec,todayCalc,cfg,nowMin,onMarkEntry,onMarkExit,onU
   const pct=(v)=>Math.min(100,Math.max(0,((v-sStart+30)/span)*100));
   return(
     <div className="card">
-      <div className="today">
+      <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1.1fr 1fr",gap:isMobile?12:24,alignItems:"start"}}>
         <div className="today-left">
           <div className="today-date">{dayStr}</div>
           <div className="today-hero">

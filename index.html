@@ -24,7 +24,7 @@ html,body{background:var(--bg);color:var(--ink);font-family:'Geist',ui-sans-seri
   --rest:oklch(60% 0.03 250);--rest-soft:oklch(95% 0.012 250);
 }
 .app{min-height:100vh;padding:8px;max-width:100%;margin:0 auto;overflow-x:hidden}
-@media(min-width:700px){.app{padding:24px 32px 64px}}
+@media(min-width:700px){.app{padding:16px 20px 40px}}
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:0 0 12px;gap:8px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px}
 .brand-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px color-mix(in oklch,var(--accent) 18%,transparent);flex-shrink:0}
@@ -722,7 +722,7 @@ function WeekCard({week,cfg}){
           meta: <strong style={{color:'var(--ink)'}}>{weekGoalHrs}h</strong>
         </div>
       </div>
-      <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:6,height:window.innerWidth<700?90:120,padding:0,width:'100%'}}>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:8,height:window.innerWidth<700?90:130,padding:0,width:'100%'}}>
         {week.days.map(({date,key,calc})=>{
           const isToday=dateKey(new Date())===key; const isFuture=date>new Date()&&!isToday;
           const goalDailyMin=parseHM(cfg.scheduleEnd)-parseHM(cfg.scheduleStart)-cfg.lunchMin; const barH=isFuture?0:calc?Math.min(100,(calc.worked/goalDailyMin)*100):0;
